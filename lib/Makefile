@@ -1,7 +1,7 @@
 #
 # Makefile for solverBench
 #
-WITH_AURORA=false
+WITH_AURORA=true
 
 OPTLEVEL = -O3
 DBGFLAGS = -g
@@ -26,6 +26,7 @@ FC=mpifort
 endif
 
 SRCDIR = ../src
+DISTDIR = ../dist/lib
 CFLAGS += -I$(SRCDIR)
 CXXFLAGS += -I$(SRCDIR)
 CXXSRCS = vesolver_api.cpp veserver_api.cpp SpMatrix.cpp
@@ -49,6 +50,12 @@ OBJS += $(CSRCS:.c=.o)
 
 libvesolver.so: $(OBJS)
 	$(CXX) $(CXXFLAGS) -shared -o $@ $^
+
+dist:
+	if [ ! -d $(DISTDIR) ]; then \
+		mkdir -p $(DISTDIR); \
+	fi; \
+	cp $(LIBS) $(DISTDIR)
 
 clean:
 	rm *.o $(LIBS) 2> /dev/null || true

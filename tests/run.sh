@@ -5,7 +5,7 @@ host_procs=4
 solver_threads=8
 solver_procs=1
 prog=./test3
-RUN_ON_VE=0
+RUN_ON_VE=1
 
 if [ $# -ge 1 ]; then
     host_procs=$1    

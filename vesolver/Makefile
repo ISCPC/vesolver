@@ -1,7 +1,7 @@
 #
 # Makefile for solverBench
 #
-WITH_AURORA=false
+WITH_AURORA=true
 
 #
 # Enable/Disable ElmerFEM solver support
@@ -13,7 +13,7 @@ WITH_ELMERSOLVER=true
 #
 WITH_MKL=true
 
-WITH_MPI=true
+WITH_MPI=false
 
 OPTLEVEL = -O3
 DBGFLAGS = -g
@@ -41,6 +41,7 @@ FC=mpifort
 endif
 
 SRCDIR = ../src
+DISTDIR = ../dist/ve
 CFLAGS += -I$(SRCDIR)
 #CSRCS = $(SRCDIR)/common.c $(SRCDIR)/solver.c $(SRCDIR)/vesolver.c
 #CXXSRCS = $(SRCDIR)/veserver.cpp $(SRCDIR)/vesolver.cpp
@@ -166,6 +167,10 @@ else
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 endif
 endif
+
+dist:
+	cp $(CMDS) $(DISTDIR)/bin; \
+	cp libelmerapi.so $(DISTDIR)/lib
 
 clean:
 	rm *.o $(CMDS) $(LIBS) 2> /dev/null || true

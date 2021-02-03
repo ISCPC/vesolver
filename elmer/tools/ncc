@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+my @opts;
+
+foreach my $arg (@ARGV) {
+    if ($arg eq "-fPIE") {
+        push @opts, -fPIC;
+    } elsif ($arg eq "-fomit-frame-pointer") {
+        push @opts, "";
+    } else {
+        push @opts, $arg;
+    }
+}
+
+my $ncc_version = $ENV{NCC_VERSION};
+
+if ($ncc_version) {
+    $cmd = sprintf("/opt/nec/ve/bin/ncc-%s %s", $ncc_version, join(' ', @opts));
+} else {
+    $cmd = sprintf("/opt/nec/ve/bin/ncc %s", join(' ', @opts));
+}
+
+#print $cmd,"\n";
+$rc = system($cmd);
+
+exit($rc>>8);

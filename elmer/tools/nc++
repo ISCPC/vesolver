@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+my @opts;
+
+foreach my $arg (@ARGV) {
+    if ($arg eq "-fPIE") {
+        push @opts, -fPIC;
+    } else {
+        push @opts, $arg;
+    }
+}
+
+my $ncc_version = $ENV{NCC_VERSION};
+
+if ($ncc_version) {
+    $cmd = sprintf("/opt/nec/ve/bin/nc++-%s %s", $ncc_version, join(' ', @opts));
+} else {
+    $cmd = sprintf("/opt/nec/ve/bin/nc++ %s", join(' ', @opts));
+}
+
+#print $cmd, "\n";
+$rc = system($cmd); 
+
+exit($rc>>8);

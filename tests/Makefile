@@ -1,7 +1,7 @@
 #
 # Makefile for solverBench
 #
-WITH_AURORA=false
+WITH_AURORA=true
 
 OPTLEVEL = -O3
 DBGFLAGS = -g

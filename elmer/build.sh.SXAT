@@ -18,6 +18,10 @@ OPTIONS="${OPTIONS} -DWITH_OpenMP:BOOL=TRUE"
 
 #TOOLPATH=../elmerfem/tools
 TOOLPATH=../tools
+NCC_PATH=${PWD}/tools
+NLC_LIBRARY_PATH=/opt/nec/ve/nlc/2.0.0/lib
+
+OPTIONS="${OPTIONS} -DSXAT_NCC_PATH=${NCC_PATH} -DSXAT_NLC_LIBRARY_PATH=${NLC_LIBRARY_PATH}"
 
 if [ "$WITH_MPI" = "true" ]; then
     OPTIONS="${OPTIONS} -DWITH_MPI:BOOL=TRUE"
@@ -60,5 +64,5 @@ cmake3 ${OPTIONS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH} ../elmerfem
 
 if [ $? -eq 0 ]; then
     echo "Start building elmerFEM... Watch _make.log!"
-    #make -j 12 > _make.log 2>&1 &
+    make -j > _make.log 2>&1 &
 fi
