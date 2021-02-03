@@ -1,0 +1,13 @@
+*/*.o
+*/*.so
+*/*.a
+*/*.bin
+*/*.mod
+vesolver/vesolver
+tests/test.log*
+tests/test[1-9]
+tests/test[1-9]f
+old/*/*.bin
+old/*/*.o
+dist
+elemer/build

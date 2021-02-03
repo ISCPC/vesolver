@@ -1,0 +1,77 @@
+#!/bin/bash
+
+WITH_FTRACE=false
+WITH_AURORA=false
+WITH_MKL=true
+WITH_MPI=true
+
+### Add Solver Options
+OPTIONS="-DWITH_ELMERGUI:BOOL=FALSE"
+OPTIONS="${OPTIONS} -DWITH_TIMELOG:BOOL=TRUE"
+OPTIONS="${OPTIONS} -DWITH_OpenMP:BOOL=TRUE"
+OPTIONS="${OPTIONS} -DCMAKE_TOOLCHAIN_FILE=../elmerfem/cmake/Toolchains/Elmer-linux-gcc-openmp.cmake"
+
+if [ "$WITH_MPI" = "true" ]; then
+    OPTIONS="${OPTIONS} -DWITH_MPI:BOOL=TRUE"
+else
+    OPTIONS="${OPTIONS} -DWITH_MPI:BOOL=FALSE"
+fi
+
+# with MKL/Aurora
+if [ "$WITH_AURORA" != "true" ]; then
+    if [ "$WITH_MKL" = "true" ]; then
+        export MKLROOT=/opt/intel/mkl
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/lib/intel64:/opt/intel/mkl/lib/intel64:/opt/elmerfem/lib
+
+        OPTIONS="${OPTIONS} -DWITH_MKL:BOOL=TRUE"
+        OPTIONS="${OPTIONS} -DWITH_Mumps:BOOL=FALSE"
+    else
+        OPTIONS="${OPTIONS} -DWITH_MKL:BOOL=FALSE"
+        OPTIONS="${OPTIONS} -DWITH_Mumps:BOOL=TRUE"
+    fi
+else
+    OPTIONS="${OPTIONS} -DWITH_MKL:BOOL=FALSE"
+    OPTIONS="${OPTIONS} -DWITH_Mumps:BOOL=FALSE"
+    OPTIONS="${OPTIONS} -DWITH_HeteroSolver:BOOL=TRUE"
+    OPTIONS="${OPTIONS} -DWITH_SBLAS:BOOL=TRUE"
+fi
+
+# Override Install PATH for test
+INSTALL_PATH=../../dist/ve
+
+# with Hypre
+#export HYPRE_INCLUDE_DIR=/usr/include/hypre
+#export HYPRE_LIBRARY_DIR=/usr/lib/x86_64-linux-gnu
+
+#OPTIONS="${OPTIONS} -DWITH_Hypre:BOOL=TRUE -DHypre_INCLUDE_DIR=${HYPRE_INCLUDE_DIR} -DHypre_LIBRARIES=${HYPRE_LIBRARY_DIR}"
+#OPTIONS="${OPTIONS} -DWITH_Hypre:BOOL=TRUE"
+
+# with Trilinos
+#OPTIONS="${OPTIONS} -DWITH_Trilinos:BOOL=TRUE"
+
+# with feti4i
+#export FETI4I_ROOT=/home/uno/elmer/elmerfem/feti4i
+#OPTIONS="${OPTIONS} -DWITH_FETI4I:BOOL=TRUE -DFETI4I_ROOT=${FETI4I_ROOT}"
+
+
+#
+# Run build process
+#
+mkdir build
+
+if [ $? -eq 1 ]; then
+    echo "ERROR: cannot create build directory."
+    exit 1;
+fi
+
+cd build
+cmake ${OPTIONS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH} ../elmerfem
+
+if [ $? -eq 0 ]; then
+    if [ "$WITH_AURORA" == "true" ]; then
+        echo "Start building elmerFEM... Watch _make.log!"
+        make -j > _make.log 2>&1 &
+    else
+        make -j install
+    fi
+fi

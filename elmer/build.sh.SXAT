@@ -1,0 +1,64 @@
+#!/bin/bash
+
+export PATH=/opt/nec/ve/bin:${PATH}
+
+export NCC_VERSION=3.0.6
+source /opt/nec/ve/nlc/2.0.0/bin/nlcvars.sh mpi
+source /opt/nec/ve/mpi/2.5.0/bin/necmpivars.sh
+#source /opt/nec/ve/nlc/2.2.0/bin/nlcvars.sh mpi
+#source /opt/nec/ve/mpi/2.13.0/bin/necmpivars.sh
+
+WITH_FTRACE=false
+WITH_MPI=false
+
+### Add Solver Options
+OPTIONS="-DWITH_ELMERGUI:BOOL=FALSE"
+OPTIONS="${OPTIONS} -DWITH_TIMELOG:BOOL=TRUE"
+OPTIONS="${OPTIONS} -DWITH_OpenMP:BOOL=TRUE"
+
+#TOOLPATH=../elmerfem/tools
+TOOLPATH=../tools
+
+if [ "$WITH_MPI" = "true" ]; then
+    OPTIONS="${OPTIONS} -DWITH_MPI:BOOL=TRUE"
+    if [ "$WITH_FTRACE" = "true" ]; then
+        OPTIONS="${OPTIONS} -DCMAKE_TOOLCHAIN_FILE=${TOOLPATH}/aurora-toolchain-mpi-ftrace.cmake"
+    else
+        OPTIONS="${OPTIONS} -DCMAKE_TOOLCHAIN_FILE=${TOOLPATH}/aurora-toolchain-mpi.cmake"
+    fi
+else
+    OPTIONS="${OPTIONS} -DWITH_MPI:BOOL=FALSE"
+    if [ "$WITH_FTRACE" = "true" ]; then
+        OPTIONS="${OPTIONS} -DCMAKE_TOOLCHAIN_FILE=${TOOLPATH}/aurora-toolchain-ftrace.cmake"
+    else
+        OPTIONS="${OPTIONS} -DCMAKE_TOOLCHAIN_FILE=${TOOLPATH}/aurora-toolchain.cmake"
+    fi
+fi
+
+# Override Install PATH for test
+INSTALL_PATH=../../dist/ve
+
+# with MKL/Aurora
+OPTIONS="${OPTIONS} -DWITH_MKL:BOOL=FALSE"
+OPTIONS="${OPTIONS} -DWITH_Mumps:BOOL=FALSE"
+OPTIONS="${OPTIONS} -DWITH_HeteroSolver:BOOL=FALSE"
+OPTIONS="${OPTIONS} -DWITH_SBLAS:BOOL=TRUE"
+
+
+#
+# Run build process
+#
+mkdir build
+
+if [ $? -eq 1 ]; then
+    echo "ERROR: cannot create build directory."
+    exit 1;
+fi
+
+cd build
+cmake3 ${OPTIONS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH} ../elmerfem
+
+if [ $? -eq 0 ]; then
+    echo "Start building elmerFEM... Watch _make.log!"
+    #make -j 12 > _make.log 2>&1 &
+fi
