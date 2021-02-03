@@ -21,7 +21,7 @@ fi
 if [ "$WITH_AURORA" != "true" ]; then
     if [ "$WITH_MKL" = "true" ]; then
         export MKLROOT=/opt/intel/mkl
-        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/lib/intel64:/opt/intel/mkl/lib/intel64:/opt/elmerfem/lib
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/lib/intel64:/opt/intel/mkl/lib/intel64
 
         OPTIONS="${OPTIONS} -DWITH_MKL:BOOL=TRUE"
         OPTIONS="${OPTIONS} -DWITH_Mumps:BOOL=FALSE"
