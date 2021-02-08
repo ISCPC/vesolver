@@ -296,7 +296,7 @@ int VESolver::solve(int solver, SpDistMatrix **An, DistVector **bn, int n, Vecto
 #if 0 /* Sanity check */
     printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
         A->nrow, A->ncol, A->neq, A->ndim, A->pointers[A->neq-1], A->pointers[A->neq]);
-    for (int i=0; i<=A->neq; i++) {
+    for (int i=0; i<A->neq; i++) {
         if ((A->pointers[i] <= 0)||(A->pointers[i] > A->ndim+1)) {
             printf("Invalid pointer A[%d]=%d\n", i, A->pointers[i]);
         }
@@ -591,23 +591,11 @@ inline int VESolver::receive_matrix_data(int src, SpMatrix* A, Vector* b) {
     printf("INFO:VESolver[%d]::vesolver_receive_matrix_data: Receive request from rank %d with %d %d %d %d\n",
         myrank, src, A->nrow, A->ncol, A->ndim, A->neq);
 
-    A->value = (double*)calloc(A->ndim, sizeof(double));
-    if (A->value == NULL) {
+    if (A->alloc(A->nrow, A->ndim)) {
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
         return -1;
     }
-    A->indice = (INT_T*)calloc(A->ndim, sizeof(INT_T));
-    if (A->indice == NULL) {
-        printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
-        return -1;
-    }
-    A->pointers = (INT_T*)calloc(A->nrow+1, sizeof(INT_T));
-    if (A->pointers == NULL) {
-        printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
-        return -1;
-    }
-    b->value = (double*)calloc(A->nrow, sizeof(double));
-    if (b->value == NULL) {
+    if (b->alloc(A->nrow)) {
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
         return -1;
     }
@@ -642,30 +630,18 @@ inline int VESolver::receive_matrix_data(int src, SpDistMatrix* A, DistVector* b
     int cc;
     MPI_Status status;
 
-    A->value = (double*)calloc(A->ndim, sizeof(double));
-    if (A->value == NULL) {
+    if (A->alloc(A->nrow, A->ndim)) {
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
         return -1;
     }
-    A->indice = (INT_T*)calloc(A->ndim, sizeof(INT_T));
-    if (A->indice == NULL) {
+
+    A->rorder = (INT_T*)calloc(A->neq, sizeof(INT_T));
+    if (A->rorder == NULL) {
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
         return -1;
     }
-    A->pointers = (INT_T*)calloc(A->nrow+1, sizeof(INT_T));
-    if (A->pointers == NULL) {
-        printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
-        return -1;
-    }
-    //if (A->maxgind == 0) {
-        A->rorder = (INT_T*)calloc(A->neq, sizeof(INT_T));
-        if (A->rorder == NULL) {
-            printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
-            return -1;
-        }
-    //}
-    b->value = (double*)calloc(A->nrow, sizeof(double));
-    if (b->value == NULL) {
+
+    if (b->alloc(A->nrow)) {
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
         return -1;
     }
@@ -727,6 +703,31 @@ int VESolver::process_gather_on_vh(VES_request_t& req) {
         printf("ERROR:VESolver::process_gather_on_vh: allocation error. [%s:%d]\n", __FILE__, __LINE__);
         return -1;
     } 
+
+#if 0 /* Sanity check */
+    printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
+        A.nrow, A.ncol, A.neq, A.ndim, A.pointers[A.neq-1], A.pointers[A.neq]);
+    for (int i=0; i<A.neq; i++) {
+        if ((A.pointers[i] <= 0)||(A.pointers[i] > A.ndim+1)) {
+            printf("Invalid pointer A[%d]=%d\n", i, A.pointers[i]);
+        }
+
+        int k = A.pointers[i]-1;
+        int prev = A.indice[k];
+        for (int j=A.pointers[i]; j<A.pointers[i+1]-1; j++) {
+            if (A.indice[j] <= prev) {
+                printf("Invalid indice A[%d, %d]=%d < %d\n", i, j, A.indice[j], prev);
+            }
+            prev = A.indice[j];
+        }
+    }
+    for (int i=0; i<A.ndim; i++) {
+        if ((A.indice[i] <= 0)||(A.indice[i] > A.ncol)) {
+            printf("Invalid indice A[%d]=%d\n", i, A.indice[i]);
+        }
+    }
+#endif
+
     cc = solve(payload->solver, A, b, x, payload->res);
     send_result(x);
     return cc;

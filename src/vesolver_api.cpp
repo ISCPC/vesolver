@@ -170,6 +170,30 @@ int VESolverAPI::solve(int solver, SpDistMatrix **An, DistVector **bn, int n, Ve
     SpMatrix *A = SpDistMatrix::gather(An, n);
     TIMELOG_END(tl, "gather_A");
 
+#if 0 /* Sanity check */
+    printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
+        A->nrow, A->ncol, A->neq, A->ndim, A->pointers[A->neq-1], A->pointers[A->neq]);
+    for (int i=0; i<A->neq; i++) {
+        if ((A->pointers[i] <= 0)||(A->pointers[i] > A->ndim+1)) {
+            printf("Invalid pointer A[%d]=%d\n", i, A->pointers[i]);
+        }
+
+        int k = A->pointers[i]-1;
+        int prev = A->indice[k];
+        for (int j=A->pointers[i]; j<A->pointers[i+1]-1; j++) {
+            if (A->indice[j] <= prev) {
+                printf("Invalid indice A[%d, %d]=%d < %d\n", i, j, A->indice[j], prev);
+            }
+            prev = A->indice[j];
+        }
+    }
+    for (int i=0; i<A->ndim; i++) {
+        if ((A->indice[i] <= 0)||(A->indice[i] > A->ncol)) {
+            printf("Invalid indice A[%d]=%d\n", i, A->indice[i]);
+        }
+    }
+#endif
+
     TIMELOG_START(tl);
     Vector *b = DistVector::gather(bn, n, An);
     TIMELOG_END(tl, "gather_B");
@@ -224,17 +248,14 @@ int VESolverAPI::solve_gather_on_vh(int solver, SpDistMatrix& A, DistVector& b, 
         for(int i=1; i<nprocs; i++) {
             // Memory Allocation
             An[i] = new SpDistMatrix();
-            An[i]->value = (double*)calloc(info[i].ndim, sizeof(double));
-            An[i]->indice = (INT_T*)calloc(info[i].ndim, sizeof(INT_T));
-            An[i]->pointers = (INT_T*)calloc(info[i].nrow+1, sizeof(INT_T));
+            An[i]->alloc(info[i].nrow, info[i].ndim);
             An[i]->rorder = (INT_T*)calloc(info[i].neq, sizeof(INT_T));
             An[i]->nrow = An[i]->ncol = info[i].nrow;
             An[i]->ndim = info[i].ndim;
             An[i]->neq = info[i].neq;
 
             bn[i] = new DistVector();
-            bn[i]->value = (double*)calloc(info[i].nrow, sizeof(double));
-            bn[i]->size = info[i].nrow;
+            bn[i]->alloc(info[i].nrow);
 
             // Receive Matrix A
             MPI_Recv(An[i]->value, info[i].ndim, MPI_DOUBLE, i, VES_MATGATHER_TAG, cl_comm, &status);
