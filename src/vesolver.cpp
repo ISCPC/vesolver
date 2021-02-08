@@ -136,13 +136,13 @@ int VESolver::pardiso_solve(SpMatrix& A, Vector& b, Vector& x, double res) {
     for(int i=0;i<64;i++) { pt[i]=0; }
     for(int i=0; i<64; i++) { iparm[i] = 0; }
 
+    /* Perform analysis */
+#if 1
     iparm[0]=0;
     iparm[1]=3;
     iparm[5]=0;
     iparm[39]=0;
 
-    /* Perform analysis */
-#if 1
     phase = 11;
     cluster_sparse_solver(pt, &maxfct, &mnum, &mtype, &phase,
         &A.neq, A.value, A.pointers, A.indice,
@@ -170,7 +170,28 @@ int VESolver::pardiso_solve(SpMatrix& A, Vector& b, Vector& x, double res) {
         &perm, &nrhs, iparm, &msglvl,
         b.value, x.value, &comm, &ierr);
 #else
-    phase = 13;
+    iparm[0]=1;
+    iparm[1]=2;
+    iparm[5]=0;
+    iparm[10]=0;
+    iparm[11]=0;
+    iparm[17]=-1;
+    iparm[26]=1;
+    iparm[34]=0;
+
+    phase = 11;
+    pardiso(pt, &maxfct, &mnum, &mtype, &phase,
+        &A.neq, A.value, A.pointers, A.indice,
+        &perm, &nrhs, iparm, &msglvl,
+        b.value, x.value, &ierr);
+
+    phase = 22;
+    pardiso(pt, &maxfct, &mnum, &mtype, &phase,
+        &A.neq, A.value, A.pointers, A.indice,
+        &perm, &nrhs, iparm, &msglvl,
+        b.value, x.value, &ierr);
+
+    phase = 33;
     pardiso(pt, &maxfct, &mnum, &mtype, &phase,
         &A.neq, A.value, A.pointers, A.indice,
         &perm, &nrhs, iparm, &msglvl,
@@ -270,17 +291,21 @@ int VESolver::solve(int solver, SpDistMatrix **An, DistVector **bn, int n, Vecto
     TIMELOG_END(tl, "gather_A");
 
 #if 0 /* Sanity check */
-    printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d\n", 
-        A->nrow, A->ncol, A->neq, A->ndim);
-    int prev = 0;
+    printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
+        A->nrow, A->ncol, A->neq, A->ndim, A->pointers[A->neq-1], A->pointers[A->neq]);
     for (int i=0; i<=A->neq; i++) {
-        if ((A->pointers[i] <= 0)||(A->pointers[i] > A->ndim)) {
+        if ((A->pointers[i] <= 0)||(A->pointers[i] > A->ndim+1)) {
             printf("Invalid pointer A[%d]=%d\n", i, A->pointers[i]);
         }
-        if (A->pointers[i] < prev) {
-            printf("Invalid pointer A[%d]=%d < %d\n", i, A->pointers[i], prev);
+
+        int k = A->pointers[i]-1;
+        int prev = A->indice[k];
+        for (int j=A->pointers[i]; j<A->pointers[i+1]-1; j++) {
+            if (A->indice[j] <= prev) {
+                printf("Invalid indice A[%d, %d]=%d < %d\n", i, j, A->indice[j], prev);
+            }
+            prev = A->indice[j];
         }
-        prev = A->pointers[i];
     }
     for (int i=0; i<A->ndim; i++) {
         if ((A->indice[i] <= 0)||(A->indice[i] > A->ncol)) {
@@ -391,6 +416,8 @@ int VESolver::cpardiso_solve(SpDistMatrix& A, DistVector& b, Vector& x, double r
 
     printf("INFO:VESolver[%d]: Solving the system of equations using the Cluster PARDISO.\n\n", myrank);
     //printf("INFO: A: type=0x%x, nrow=%d, neq=%d, mingind=%d, maxgind=%d\n", A.type, A.nrow, A.neq, A.mingind, A.maxgind);
+
+    A.ConvertToDCSR();
 
     // Set up parameters explicitly
     for(int i=0;i<64;i++) { pt[i]=0; }
@@ -628,13 +655,13 @@ inline int VESolver::receive_matrix_data(int src, SpDistMatrix* A, DistVector* b
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
         return -1;
     }
-    if (A->maxgind == 0) {
+    //if (A->maxgind == 0) {
         A->rorder = (INT_T*)calloc(A->neq, sizeof(INT_T));
         if (A->rorder == NULL) {
             printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
             return -1;
         }
-    }
+    //}
     b->value = (double*)calloc(A->nrow, sizeof(double));
     if (b->value == NULL) {
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
@@ -656,12 +683,12 @@ inline int VESolver::receive_matrix_data(int src, SpDistMatrix* A, DistVector* b
     if (cc != 0) {
         printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
     }
-    if (A->maxgind == 0) {
+    //if (A->maxgind == 0) {
         cc = MPI_Recv(A->rorder, A->neq, MPI_INTEGER, src, VES_MATDATA_TAG, ves_comm, &status);
         if (cc != 0) {
             printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
         }
-    }
+    //}
 
 #if 0
     for(int i=0; i<5; i++) {
@@ -887,6 +914,15 @@ int test_symmetric(VESolver& server, Vector& x, double res, int solver) {
     /* Allocate Vector x */
     x.alloc(A.neq);
 
+    printf("INFO:test_symmetric[%d]: A.nrow=%d A.neq=%d A.mingind=%d A.maxgind=%d\n", 
+        rank, A.nrow, A.neq, A.mingind, A.maxgind);
+#if 0
+    for(int i=0; i<5; i++) {
+        for(int j=A.pointers[i]-1; j<A.pointers[i+1]-1; j++) {
+            printf("INFO:test_symmetric[%d]: A(%d, %d) = %lf\n", rank, i, A.indice[j-1], A.value[j-1]);
+        }
+    }
+#endif
     server.solve(solver, A, b, x, res);
 
     return cc;

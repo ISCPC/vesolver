@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
         /* The row numbers 1, 2, 3, and 4 are assigned to the MPI process 0. */
         A.mingind=1;
         A.maxgind=4;
+        A.nrow=A.maxgind-A.mingind+1;
         A.value  = (double*)   malloc(sizeof(double)*8);
         A.indice = (int*) malloc(sizeof(int)*8);
         A.pointers = (int*) malloc(sizeof(int)*(A.maxgind-A.mingind+2));
@@ -84,6 +85,7 @@ int main(int argc, char** argv) {
         /* The row numbers 3, 4, 5, 6 and 7 are assigned to the MPI process 1. */
         A.mingind=3;
         A.maxgind=7;
+        A.nrow=A.maxgind-A.mingind+1;
         A.value  = (double*)   malloc(sizeof(double)*11);
         A.indice = (int*) malloc(sizeof(int)*11);
         A.pointers = (int*) malloc(sizeof(int)*(A.maxgind-A.mingind+2));
@@ -106,8 +108,11 @@ int main(int argc, char** argv) {
     if (Step != MPI_COMM_NULL) {
         for (int i=0; i<10; i++) {
             vesolver_activate(Step, 2);
-            vesolver_psolve_dcsr(VES_MODE_SYMMETRIC, VESOLVER_HS,
-                A.neq, A.pointers, A.indice, A.value, A.mingind, A.maxgind, b, x, res);
+            vesolver_psolve2(VES_MODE_SYMMETRIC, VESOLVER_HS, 
+                A.neq, A.nrow, A.mingind, A.maxgind, A.pointers, A.indice, A.value, A.rorder,
+                b, x, res);
+            //vesolver_psolve_dcsr(VES_MODE_SYMMETRIC, VESOLVER_HS,
+            //    A.neq, A.pointers, A.indice, A.value, A.mingind, A.maxgind, b, x, res);
             vesolver_deactivate();
 
             if (rank == 2) {

@@ -122,68 +122,39 @@ int SpMatrix::load_file(const char *filename) {
 
         /* reordering indice */
         for(int i=0; i<ndim; i++) {
-            indice[i] = order[indice[i]-1];
+            if ((indice[i] > nrow)||(indice[i]<=0)) {
+                printf("ERROR: invalid data in indice[%d] = %d.\n", i, indice[i]);
+            } else {
+                indice[i] = order[indice[i]-1];
+            }
         }
 
         /* create reverse order table */
         rorder = (INT_T*)calloc(neq, sizeof(INT_T));
         for(int i=0; i<nrow; i++) {
-            rorder[order[i]-1] = i+1;
+            if ((order[i]-1 >= neq)||(order[i]<=0)) {
+                printf("ERROR: invalid data in order[%d] = %d.\n", i, order[i]);
+            } else {
+                rorder[order[i]-1] = i+1;
+            }
         }
-
+#if 1
+        /* find max/min index */
+        maxgind = order[0];
+        mingind = order[0];
+        for(int i=1; i<nrow; i++) {
+            if (order[i] > maxgind) maxgind = order[i];
+            if (order[i] < mingind) mingind = order[i];
+        }
+#else
         mingind = 0;
         maxgind = 0;
-
+#endif
     } else {
         neq = nrow;
     }
 
     close(fd);
-
-    return 0;
-}
-
-int SpDistMatrix::ConvertToDCSR() {
-    INT_T* tmpind;
-    double* tmpval;
-
-    /* find max/min index */
-    maxgind = order[0];
-    mingind = order[0];
-    for(int i=1; i<nrow; i++) {
-        if (order[i] > maxgind) maxgind = order[i];
-        if (order[i] < mingind) mingind = order[i];
-    }
-
-    /* sorting indice */
-    int size = maxgind-mingind+1;
-    tmpind = (INT_T*)calloc(sizeof(INT_T), size);
-    tmpval = (double*)calloc(sizeof(double), size);
-    for(int i=0; i<nrow; i++) {
-        bzero(tmpind, sizeof(INT_T)*size);
-        for(int j=pointers[i]-1; j<pointers[i+1]-1; j++) {
-            int k = indice[j]-mingind;
-            if (tmpind[k] > 0) {
-                printf("ERROR:row:%d: found same index %d.\n", i, k+mingind);
-            }
-            tmpind[k] = indice[j];
-            tmpval[k] = value[j];
-        }
-
-        int j = pointers[i]-1;
-        for(int k=0; k<size; k++) {
-            if (tmpind[k] != 0) {
-                indice[j] = tmpind[k];
-                value[j] = tmpval[k];
-                j++;
-            }
-        }
-        if (j != pointers[i+1]-1) {
-            printf("ERROR:row:%d: j should be %d, but %d.\n", i, pointers[i+1]-1, j);
-        }
-    }
-    free(tmpind);
-    free(tmpval);
 
     return 0;
 }
@@ -320,8 +291,8 @@ SpMatrix* SpDistMatrix::gather(SpDistMatrix** An, int nprocs) {
     int neq = An[0]->neq;
 
     TIMELOG_START(tl);
-    double* duplex = (double*)calloc(sizeof(double), neq);
-    double* rank = (double*)calloc(sizeof(double), neq);
+    int* duplex = (int*)calloc(sizeof(int), neq);
+    int* rank = (int*)calloc(sizeof(int), neq);
     for(int i=0; i<neq; i++) {
         int lastcol=0;
         int nelem = 0;
@@ -355,6 +326,7 @@ SpMatrix* SpDistMatrix::gather(SpDistMatrix** An, int nprocs) {
     int k=0;
     for(int i=0; i<neq; i++) {
         A->pointers[i] = k+1;
+#if 0
         if (duplex[i] == 1) {
             int r = rank[i];
             int ii = An[r]->rorder[i];
@@ -379,6 +351,7 @@ SpMatrix* SpDistMatrix::gather(SpDistMatrix** An, int nprocs) {
             printf("ERROR: Unexpected condition (row=%d)\n", i);
 #endif
         } else {
+#endif
             //printf("INFO: Overwrapped row (row=%d)\n", i);
             struct sorted_list *tmplist = list_new();
             for(int r=0; r<nprocs; r++) {
@@ -403,7 +376,7 @@ SpMatrix* SpDistMatrix::gather(SpDistMatrix** An, int nprocs) {
                 k++;
             }
             list_free(tmplist);
-        }
+//        }
     }
     A->pointers[neq] = k+1;
     printf("Gather: ndim=%d, neq=%d\n", k, neq);
@@ -419,6 +392,49 @@ SpMatrix* SpDistMatrix::gather(SpDistMatrix** An, int nprocs) {
     free(rank);
 
     return A;
+}
+
+int SpDistMatrix::ConvertToDCSR() {
+    TIMELOG(tl);
+
+    TIMELOG_START(tl);
+    /* sorting indice */
+    nrow = maxgind-mingind+1;
+    INT_T* newptr = (INT_T*)calloc(sizeof(INT_T), nrow+1);
+    INT_T* newind = (INT_T*)calloc(sizeof(INT_T), ndim);
+    double* newval = (double*)calloc(sizeof(double), ndim);
+    int jj=0;
+    for (int i=0; i<nrow; i++) {
+        newptr[i] = jj+1;
+        struct sorted_list *tmplist = list_new();
+        if (rorder[mingind+i-1] != 0) {
+            int k = rorder[mingind+i-1]-1;
+            for (int j=pointers[k]-1; j<pointers[k+1]-1; j++) {
+                list_insert(tmplist, indice[j], value[j]);
+            }
+            for(struct list_item* item = list_top(tmplist); item != NULL;) {
+                struct list_item* next;
+                //printf("INFO: Insert A(%d, %d) = %lf\n", i, item->indice, item->value);
+                newind[jj] = item->indice;
+                newval[jj] = item->value;
+                next = item->next;
+                free(item);
+                item = next;
+                jj++;
+            }
+            list_free(tmplist);
+        }
+    }
+    newptr[nrow] = jj+1;
+    free(pointers);
+    free(indice);
+    free(value);
+    pointers = newptr;
+    indice = newind;
+    value = newval;
+    TIMELOG_END(tl, "ConverToDCSR");
+
+    return 0;
 }
 
 /*

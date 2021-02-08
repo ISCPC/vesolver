@@ -78,13 +78,32 @@ int main(int argc, char** argv) {
         TIMELOG(tl2);
         float t1, t2;
 
+        /* Test SYMMETRIC */
+        MPI_Barrier(comm);
+        TIMELOG_START(tl1);
+        vesolver.activate(comm, size);
+        TIMELOG_START(tl2);
+        //vesolver.solve(VESOLVER_BICGSTAB2, A, b, x, res, VES_MODE_GATHER_ON_VE);
+        vesolver.solve(VESOLVER_HS, A, b, x, res, VES_MODE_SYMMETRIC);
+        TIMELOG_GETTIME(t2, tl2);
+        vesolver.deactivate();
+        MPI_Barrier(comm);
+        TIMELOG_GETTIME(t1, tl1);
+
+        if (rank == 0) {
+            printf("Loop %d : Symmetric : %f [sec], %f [sec]\n", i, t2, t1);
+            tot1_ve += t1;
+            tot2_ve += t2;
+            fflush(stdout);
+        }
+#if 0
         /* Test Gather On VE */
         MPI_Barrier(comm);
         TIMELOG_START(tl1);
         vesolver.activate(comm, 1);
         TIMELOG_START(tl2);
-        vesolver.solve(VESOLVER_BICGSTAB2, A, b, x, res, VES_MODE_GATHER_ON_VE);
-        //vesolver.solve(VESOLVER_HS, A, b, x, res, VES_MODE_GATHER_ON_VE);
+        //vesolver.solve(VESOLVER_BICGSTAB2, A, b, x, res, VES_MODE_GATHER_ON_VE);
+        vesolver.solve(VESOLVER_HS, A, b, x, res, VES_MODE_GATHER_ON_VE);
         TIMELOG_GETTIME(t2, tl2);
         vesolver.deactivate();
         MPI_Barrier(comm);
@@ -97,13 +116,13 @@ int main(int argc, char** argv) {
             fflush(stdout);
         }
 
-        /* Test Gather On VE */
+        /* Test Gather On VH */
         MPI_Barrier(comm);
         TIMELOG_START(tl1);
         vesolver.activate(comm, 1);
         TIMELOG_START(tl2);
-        vesolver.solve(VESOLVER_BICGSTAB2, A, b, x, res, VES_MODE_GATHER_ON_VH);
-        //vesolver.solve(VESOLVER_HS, A, b, x, res, VES_MODE_GATHER_ON_VH);
+        //vesolver.solve(VESOLVER_BICGSTAB2, A, b, x, res, VES_MODE_GATHER_ON_VH);
+        vesolver.solve(VESOLVER_HS, A, b, x, res, VES_MODE_GATHER_ON_VH);
         TIMELOG_GETTIME(t2, tl2);
         vesolver.deactivate();
         MPI_Barrier(comm);
@@ -115,19 +134,38 @@ int main(int argc, char** argv) {
             tot2_vh += t2;
             fflush(stdout);
         }
+#endif
     }
 
     vesolver.fini();
+
     if (rank == 0) {
+        double* xall = (double*)calloc(sizeof(double), x.size*size);
+        MPI_Gather(x.value, x.size, MPI_DOUBLE, xall, x.size, MPI_DOUBLE, 0, comm);
+
         /* Print the solution vector */
+#if 0
         printf("%s\n", "******** Solution ********");
         for (int i=0; i<5; i++) {
             printf("x[%d] = %14.12f\n", i, x.value[i]);
         }
         printf("%s\n", "********** End ***********");
+#else
+        for (int i=0; i<x.size; i++) {
+            printf("x[%d] = %lf\n", i, x.value[i]);
+            for (int j=1; j<size; j++) {
+                if (x.value[i] != xall[j*x.size+i]) {
+                    printf("differ: x[%d] = %lf, xall[%d][%d] = %lf\n",
+                        i, x.value[i], j, i, xall[j*x.size+i]);
+                }
+            }
+        }
+#endif
 
         printf("AVERAGE:Gather_On_VE : %f [sec], %f [sec]\n", tot2_ve/nloop, tot1_ve/nloop);
         printf("AVERAGE:Gather_On_VH : %f [sec], %f [sec]\n", tot2_vh/nloop, tot1_vh/nloop);
+    } else {
+        MPI_Gather(x.value, x.size, MPI_DOUBLE, NULL, 0, MPI_DOUBLE, 0, comm);
     }
 
     MPI_Finalize();

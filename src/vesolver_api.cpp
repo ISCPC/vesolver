@@ -92,9 +92,9 @@ int VESolverAPI::send_matrix_data(int rank, SpDistMatrix& A, DistVector& b) {
     cc = MPI_Send(A.value, A.ndim, MPI_DOUBLE, rank, VES_MATDATA_TAG, ves_comm);
     cc = MPI_Send(A.indice, A.ndim, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
     cc = MPI_Send(A.pointers, A.nrow+1, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
-    if (A.maxgind == 0) {
+    //if (A.maxgind == 0) {
         cc = MPI_Send(A.rorder, A.neq, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
-    }
+    //}
 
     // Send Matrix b
     cc = MPI_Send(b.value, A.nrow, MPI_DOUBLE, rank, VES_MATDATA_TAG, ves_comm);
@@ -421,6 +421,31 @@ int vesolver_psolve(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, in
     A.neq = neq;
     A.mingind = 0;
     A.maxgind = 0;
+    A.type = SPMATRIX_TYPE_CSR | SPMATRIX_TYPE_INDEX1 | SPMATRIX_TYPE_ASYMMETRIC | SPMATRIX_TYPE_DISTRIBUTE;
+
+    b0.size = nrows;
+    b0.value = b;
+     
+    x0.size = neq;
+    x0.value = x;
+     
+    return vesolver.solve(solver, A, b0, x0, res, mode);
+}
+
+int vesolver_psolve2(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, int32_t nl, int32_t nt, int32_t *pointers, int32_t *indice, double *value, int32_t *rorder, double *b, double *x, double res) {
+    SpDistMatrix A;
+    DistVector b0;
+    Vector x0;
+
+    A.pointers = pointers;
+    A.indice = indice;
+    A.value = value;
+    A.rorder = rorder;
+    A.ndim = pointers[nrows]-1;
+    A.nrow = A.ncol = nrows;
+    A.neq = neq;
+    A.mingind = nl;
+    A.maxgind = nt;
     A.type = SPMATRIX_TYPE_CSR | SPMATRIX_TYPE_INDEX1 | SPMATRIX_TYPE_ASYMMETRIC | SPMATRIX_TYPE_DISTRIBUTE;
 
     b0.size = nrows;
