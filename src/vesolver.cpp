@@ -47,6 +47,7 @@ SOFTWARE.
 int VESolver::hs_solve(SpMatrix& A, Vector& b, Vector& x, double res) {
 #ifdef HETEROSOLVER
     /* Local variables */
+    HS_int_t nrows = A.nrow;
     int ierr;
 
     /* Handle Initialization */
@@ -61,13 +62,15 @@ int VESolver::hs_solve(SpMatrix& A, Vector& b, Vector& x, double res) {
     HS_int_t iformat = SPMATRIX_IS_CSR(A) ? HS_CSR : HS_CSC;
 #else
     HS_int_t isym = HS_UNSYMMETRIC;
-    HS_int_t iformat = HS_CSR;
+    HS_int_t iformat = HS_DCSR;
 #endif
     
     printf("INFO:VESolver[%d]:Solving the system of equations using the Heterosolver on VE.\n\n", myrank);
-    //printf("INFO: A: type=0x%x, nrow=%d, ncol=%d\n", A->type, A->nrow, A->ncol);
 
-    ierr = PHS_init_handle(&hnd, A.nrow, A.ncol, isym, iformat, HS_MASTER, 0, 0, solver_comm);
+    MPI_Bcast(&nrows, 1, MPI_INTEGER, 0, solver_comm);
+    //printf("INFO: A: type=0x%x, isym=%d, iformat=%d, nrows=%d\n", isym, iformat, A.type, nrows);
+
+    ierr = PHS_init_handle(&hnd, nrows, nrows, isym, iformat, HS_MASTER, 1, A.nrow, solver_comm);
     if (ierr != HS_RESULT_OK) {
         fprintf(stderr, "ERROR: HS_init_handle failed with %d.\n", ierr);
         exit(1);

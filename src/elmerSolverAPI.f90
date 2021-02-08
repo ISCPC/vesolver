@@ -89,6 +89,8 @@ SUBROUTINE ElmerSolverAPI(neq, ndim, pointers, indice, val, b, x, solverId, preC
 
     CALL ListAddNewInteger( Solver % Values, 'Linear System Max Iterations', 5000 )
     CALL ListAddNewConstReal( Solver % Values, 'Linear System Convergence Tolerance', 1.0D-10 )
+    !CALL ListAddNewConstReal( Solver % Values, 'Linear System Convergence Tolerance', 1.0D-7 )
+    CALL ListAddNewConstReal( Solver % Values, 'Steady State Convergence Tolerance', 1.0D-5 )
     CALL ListAddNewInteger( Solver % Values, 'BiCGstabl polynomial degree', 2)
     CALL ListAddNewConstReal( Solver % Values, 'Linear System ILUT Tolerance', 1.0D-3 )
     CALL ListAddNewLogical( Solver % Values, 'Linear System Abort Not Converged', .FALSE. )

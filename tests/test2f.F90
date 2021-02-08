@@ -100,12 +100,13 @@ program example_hybrid_unsym_dcsr_distab_indexing_1
    
    ! Local variables
    integer :: ierr, comm, myrank, nprocs, i, j, lx
+   integer :: mode, solver
    ! macro definition
 
    call MPI_Init(ierr)
    call MPI_Comm_rank(MPI_COMM_WORLD, myrank, ierr)
    call MPI_Comm_split(MPI_COMM_WORLD, 0, myrank, comm, ierr)
-   call MPI_Comm_size(comm, nprocs, ierr)
+   !call MPI_Comm_size(comm, nprocs, ierr)
    
    ! Input Preparation
    if(myrank == 0) then
@@ -147,10 +148,20 @@ program example_hybrid_unsym_dcsr_distab_indexing_1
         STOP
     END IF
 
-   call VESolver_Activate(comm, 1, ierr)
-   !call VESolver_PSolve(VES_MODE_GATHER_ON_VE, VESOLVER_BICGSTAB2, &
-   call VESolver_PSolve(VES_MODE_GATHER_ON_VH, VESOLVER_BICGSTAB2, &
-        neq, nrow, aval, iaptr, iaind, order, b, x, res, ierr)
+#if 0
+    #mode = VES_MODE_GATHER_ON_VE
+    mode = VES_MODE_GATHER_ON_VH
+    solver = VESOLVER_BICGSTAB2
+    nprocs = 1
+#else
+    mode = VES_MODE_SYMMETRIC
+    solver = VESOLVER_HS
+    nprocs = 2
+#endif
+
+   call VESolver_Activate(comm, nprocs, ierr)
+   call VESolver_PSolve(mode, solver, neq, nrow, aval, iaptr, iaind, &
+        order, b, x, res, ierr)
    call VESolver_Deactivate()
    call VESolver_Fini()
    
