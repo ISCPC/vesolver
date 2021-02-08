@@ -417,8 +417,6 @@ int VESolver::cpardiso_solve(SpDistMatrix& A, DistVector& b, Vector& x, double r
     printf("INFO:VESolver[%d]: Solving the system of equations using the Cluster PARDISO.\n\n", myrank);
     //printf("INFO: A: type=0x%x, nrow=%d, neq=%d, mingind=%d, maxgind=%d\n", A.type, A.nrow, A.neq, A.mingind, A.maxgind);
 
-    A.ConvertToDCSR();
-
     // Set up parameters explicitly
     for(int i=0;i<64;i++) { pt[i]=0; }
 
@@ -532,6 +530,7 @@ int VESolver::solve(int solver, SpDistMatrix& A, DistVector& b, Vector& x, doubl
     TIMELOG_START(tl);
     switch(solver) {
         case VESOLVER_HS:
+            A.ConvertToDCSR();
 #ifdef HETEROSOLVER
             cc = hs_solve(A, b, x, res);
 #else
@@ -857,6 +856,7 @@ int test_gather_on_ve(VESolver& server, Vector& x, double res, int solver) {
             fprintf(stderr, "ERROR: cannot load matrix A%d from %s\n", i, infile);
             exit(1);
         }
+        An[i]->reordering();
 
         bn[i] = new DistVector();
         snprintf(infile, 256, "%s%d.bin", prefix_b, i);
@@ -903,6 +903,7 @@ int test_symmetric(VESolver& server, Vector& x, double res, int solver) {
         fprintf(stderr, "ERROR: cannot load matrix A from %s\n", infile);
         exit(1);
     }
+    A.reordering();
 
     /* Load Vector b */
     snprintf(infile, 256, "%s%d.bin", prefix_b, rank);

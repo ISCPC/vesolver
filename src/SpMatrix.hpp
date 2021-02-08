@@ -36,6 +36,7 @@ typedef uint32_t UINT_T;
 #define SPMATRIX_TYPE_ASYMMETRIC (0<<8)
 #define SPMATRIX_TYPE_SYMMETRIC  (1<<8)
 #define SPMATRIX_TYPE_DISTRIBUTE (1<<12)
+#define SPMATRIX_TYPE_REORDERED  (1<<16)
 
 #if 0
 #define SPMATRIX_IS_CSC(A)        ((((A)->type)&0xf) == SPMATRIX_TYPE_CSC)
@@ -53,6 +54,7 @@ typedef uint32_t UINT_T;
 #define SPMATRIX_INDEX_TYPE()    (((type)>>4)&0xf)
 #define SPMATRIX_IS_SYMMETRIC()  (((type)&SPMATRIX_TYPE_SYMMETRIC)
 #define SPMATRIX_IS_DISTRIBUTE() ((type)&SPMATRIX_TYPE_DISTRIBUTE)
+#define SPMATRIX_IS_REORDERED()  ((type)&SPMATRIX_TYPE_REORDERED)
 #endif
 
 class SpMatrix {
@@ -77,7 +79,7 @@ public:
     INT_T    *order;
     INT_T    *rorder;
 
-private:
+protected:
     bool    selfAllocated;
 };
 
@@ -86,6 +88,7 @@ public:
     SpDistMatrix();
     ~SpDistMatrix();
 
+    int reordering(); 
     static SpMatrix* gather(SpDistMatrix** An, int nprocs);
     int ConvertToDCSR();
 

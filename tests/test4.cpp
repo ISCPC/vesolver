@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
             tot2_ve += t2;
             fflush(stdout);
         }
-#if 0
+#if 1
         /* Test Gather On VE */
         MPI_Barrier(comm);
         TIMELOG_START(tl1);
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
         printf("%s\n", "********** End ***********");
 #else
         for (int i=0; i<x.size; i++) {
-            printf("x[%d] = %lf\n", i, x.value[i]);
+            //printf("x[%d] = %lf\n", i, x.value[i]);
             for (int j=1; j<size; j++) {
                 if (x.value[i] != xall[j*x.size+i]) {
                     printf("differ: x[%d] = %lf, xall[%d][%d] = %lf\n",

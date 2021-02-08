@@ -67,19 +67,19 @@ int main(int argc, char** argv) {
         A.nrow=A.maxgind-A.mingind+1;
         A.value  = (double*)   malloc(sizeof(double)*8);
         A.indice = (int*) malloc(sizeof(int)*8);
-        A.pointers = (int*) malloc(sizeof(int)*(A.maxgind-A.mingind+2));
-        A.rorder = (int*) malloc(sizeof(int)*7);
-        b = (double*)   malloc(sizeof(double)*(A.maxgind-A.mingind+1));
+        A.pointers = (int*) malloc(sizeof(int)*(A.nrow+1));
+        A.order = (int*) malloc(sizeof(int)*(A.nrow));
+        b = (double*)   malloc(sizeof(double)*(A.nrow));
         x = (double*)   malloc(sizeof(double)*7);
         double   aval_local[]  = { 1.1, 1.2, 2.2, 2.3, 3.3, 3.4, 4.1, 4.4 };
         int iaind_local[] = { 1, 2, 2, 3, 3, 4, 1, 4 };
         int iaptr_local[] = { 1, 3, 5, 7, 9 };
-        int rorder_local[] = { 1, 2, 3, 4, 0, 0, 0 };
+        int order_local[] = { 1, 2, 3, 4 };
         double   b_local[] = { 3.5, 11.3, 33.9, 10.0 };
         memcpy (A.value,  aval_local,  sizeof(aval_local) );
         memcpy (A.indice, iaind_local, sizeof(iaind_local));
         memcpy (A.pointers, iaptr_local, sizeof(iaptr_local));
-        memcpy (A.rorder, rorder_local, sizeof(rorder_local));
+        memcpy (A.order, order_local, sizeof(order_local));
         memcpy (b,  b_local,     sizeof(b_local)    );
     } else if(rank == 3) {
         /* The row numbers 3, 4, 5, 6 and 7 are assigned to the MPI process 1. */
@@ -88,19 +88,19 @@ int main(int argc, char** argv) {
         A.nrow=A.maxgind-A.mingind+1;
         A.value  = (double*)   malloc(sizeof(double)*11);
         A.indice = (int*) malloc(sizeof(int)*11);
-        A.pointers = (int*) malloc(sizeof(int)*(A.maxgind-A.mingind+2));
-        A.rorder = (int*) malloc(sizeof(int)*7);
-        b = (double*)   malloc(sizeof(double)*(A.maxgind-A.mingind+1));
+        A.pointers = (int*) malloc(sizeof(int)*(A.nrow+1));
+        A.order = (int*) malloc(sizeof(int)*(A.nrow));
+        b = (double*)   malloc(sizeof(double)*(A.nrow));
         x = (double*)   malloc(sizeof(double)*7);
         double   aval_local[]  = { 3.5, 3.7, 5.3, 5.5, 5.6, 6.5, 6.6, 6.7, 7.3, 7.6, 7.7 };
-        int iaind_local[] = { 5, 7, 3, 5, 6, 5, 6, 7, 3, 6, 7 };
+        int iaind_local[] = { 3, 5, 1, 3, 4, 3, 4, 5, 1, 4, 5 };
         int iaptr_local[] = { 1, 3, 3, 6, 9, 12 };
-        int rorder_local[] = { 0, 0, 1, 2, 3, 4, 5 };
+        int order_local[] = { 3, 4, 5, 6, 7 };
         double   b_local[] = { 33.0, 11.7, 77.0, 119.0, 121.4 };
         memcpy (A.value,  aval_local,  sizeof(aval_local) );
         memcpy (A.indice, iaind_local, sizeof(iaind_local));
         memcpy (A.pointers, iaptr_local, sizeof(iaptr_local));
-        memcpy (A.rorder, rorder_local, sizeof(rorder_local));
+        memcpy (A.order, order_local, sizeof(order_local));
         memcpy (b,  b_local,     sizeof(b_local)    );
     }
 
@@ -108,9 +108,8 @@ int main(int argc, char** argv) {
     if (Step != MPI_COMM_NULL) {
         for (int i=0; i<10; i++) {
             vesolver_activate(Step, 2);
-            vesolver_psolve2(VES_MODE_SYMMETRIC, VESOLVER_HS, 
-                A.neq, A.nrow, A.mingind, A.maxgind, A.pointers, A.indice, A.value, A.rorder,
-                b, x, res);
+            vesolver_psolve(VES_MODE_SYMMETRIC, VESOLVER_HS, 
+                A.neq, A.nrow, A.pointers, A.indice, A.value, A.order, b, x, res);
             //vesolver_psolve_dcsr(VES_MODE_SYMMETRIC, VESOLVER_HS,
             //    A.neq, A.pointers, A.indice, A.value, A.mingind, A.maxgind, b, x, res);
             vesolver_deactivate();

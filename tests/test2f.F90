@@ -68,7 +68,8 @@ program example_hybrid_unsym_dcsr_distab_indexing_1
    !       [   0,   0,   0,   0, 6.5, 6.6, 6.7 ]     [119.0]
    !       [   0,   0, 7.3,   0,   0, 7.6, 7.7 ]     [121.4]
    ! The number of rows of A
-   integer, parameter ::  mrow=7
+   integer, parameter ::  neq=7
+   integer :: nrow=0
    
    ! The number of columns of A
    integer, parameter ::  ncol=7
@@ -80,7 +81,7 @@ program example_hybrid_unsym_dcsr_distab_indexing_1
    ! Starting points of the rows of the arrays aval and iaind
    integer, allocatable :: iaptr(:)
    ! Starting points of the rows of the arrays aval and iaind
-   integer, allocatable :: rorder(:)
+   integer, allocatable :: order(:)
    ! The minimum row index of non-zero elements
    !  that belongs to each MPI process (1 <= mingind <= mrow)
    integer :: mingind = 0
@@ -111,31 +112,31 @@ program example_hybrid_unsym_dcsr_distab_indexing_1
       ! The row numbers 1, 2, 3, and 4 are assigned to the MPI process 0.
       mingind=1 
       maxgind=4
+      nrow=maxgind-mingind+1
       allocate(aval(8))
       allocate(iaind(8))
-      allocate(iaptr(maxgind-mingind+2))
-      allocate(rorder(7))
-      allocate(b(maxgind-mingind+1))
-      allocate(x(ncol))
+      allocate(iaptr(nrow+1))
+      allocate(order(nrow))
+      allocate(b(nrow), x(ncol))
       aval  = (/ 1.1d0, 1.2d0, 2.2d0, 2.3d0, 3.3d0, 3.4d0, 4.1d0, 4.4d0 /)
       iaind = (/ 1, 2, 2, 3, 3, 4, 1, 4 /)
       iaptr = (/ 1, 3, 5, 7, 9 /)
-      rorder = (/ 1, 2, 3, 4, 0, 0, 0 /)
+      order = (/ 1, 2, 3, 4 /)
       b     = (/ 3.5d0, 11.3d0, 33.9d0, 10.0d0 /)
    else if(myrank == 1) then
       ! The row numbers 3, 4, 5, 6 and 7 are assigned to the MPI process 1.
       mingind=3
       maxgind=7
+      nrow=maxgind-mingind+1
       allocate(aval(11))
       allocate(iaind(11))
-      allocate(iaptr(maxgind-mingind+2))
-      allocate(rorder(7))
-      allocate(b(maxgind-mingind+1))
-      allocate(x(ncol))
+      allocate(iaptr(nrow+1))
+      allocate(order(nrow))
+      allocate(b(nrow), x(ncol))
       aval  = (/ 3.5d0, 3.7d0, 5.3d0, 5.5d0, 5.6d0, 6.5d0, 6.6d0, 6.7d0, 7.3d0, 7.6d0, 7.7d0 /)
-      iaind = (/ 5, 7, 3, 5, 6, 5, 6, 7, 3, 6, 7 /)
+      iaind = (/ 3, 5, 1, 3, 4, 3, 4, 5, 1, 4, 5 /)
       iaptr = (/ 1, 3, 3, 6, 9, 12 /)
-      rorder = (/ 0, 0, 1, 2, 3, 4, 5 /)
+      order = (/ 3, 4, 5, 6, 7 /)
       b = (/ 33.0d0, 11.7d0, 77.0d0, 119.0d0, 121.4d0 /)
    end if
 
@@ -149,7 +150,7 @@ program example_hybrid_unsym_dcsr_distab_indexing_1
    call VESolver_Activate(comm, 1, ierr)
    !call VESolver_PSolve(VES_MODE_GATHER_ON_VE, VESOLVER_BICGSTAB2, &
    call VESolver_PSolve(VES_MODE_GATHER_ON_VH, VESOLVER_BICGSTAB2, &
-        mrow, (maxgind-mingind+1), aval, iaptr, iaind, rorder, b, x, res, ierr)
+        neq, nrow, aval, iaptr, iaind, order, b, x, res, ierr)
    call VESolver_Deactivate()
    call VESolver_Fini()
    

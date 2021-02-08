@@ -338,6 +338,8 @@ int VESolverAPI::solve(int solver, SpDistMatrix& A, DistVector& b, Vector& x, do
         return -1;
     }
 
+    A.reordering();
+
     /* Call solver */
     switch(mode) {
         case VES_MODE_GATHER_ON_VH:
@@ -407,7 +409,7 @@ int vesolver_solve(int solver, int32_t mtype, int32_t neq, int32_t *pointers, in
     return vesolver.solve(solver, A, b0, x0, res);
 }
 
-int vesolver_psolve(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, int32_t *pointers, int32_t *indice, double *value, int32_t *rorder, double *b, double *x, double res) {
+int vesolver_psolve(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, int32_t *pointers, int32_t *indice, double *value, int32_t *order, double *b, double *x, double res) {
     SpDistMatrix A;
     DistVector b0;
     Vector x0;
@@ -415,12 +417,10 @@ int vesolver_psolve(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, in
     A.pointers = pointers;
     A.indice = indice;
     A.value = value;
-    A.rorder = rorder;
+    A.order = order;
     A.ndim = pointers[nrows]-1;
     A.nrow = A.ncol = nrows;
     A.neq = neq;
-    A.mingind = 0;
-    A.maxgind = 0;
     A.type = SPMATRIX_TYPE_CSR | SPMATRIX_TYPE_INDEX1 | SPMATRIX_TYPE_ASYMMETRIC | SPMATRIX_TYPE_DISTRIBUTE;
 
     b0.size = nrows;
@@ -431,7 +431,7 @@ int vesolver_psolve(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, in
      
     return vesolver.solve(solver, A, b0, x0, res, mode);
 }
-
+#if 0
 int vesolver_psolve2(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, int32_t nl, int32_t nt, int32_t *pointers, int32_t *indice, double *value, int32_t *rorder, double *b, double *x, double res) {
     SpDistMatrix A;
     DistVector b0;
@@ -482,3 +482,4 @@ int vesolver_psolve_dcsr(int32_t mode, int32_t solver, int32_t neq, int32_t *poi
      
     return vesolver.solve(solver, A, b0, x0, res, mode);
 }
+#endif

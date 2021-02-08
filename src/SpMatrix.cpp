@@ -49,11 +49,13 @@ SpMatrix::SpMatrix() {
 SpMatrix::~SpMatrix() {
     if (selfAllocated) {
         if (pointers) { free(pointers); }
-        if (indice) { free(indice); }
         if (value) { free(value); }
         if (order) { free(order); }
-        if (rorder) { free(rorder); }
     }
+    if (selfAllocated||SPMATRIX_IS_REORDERED()) {
+        if (indice) { free(indice); }
+    }
+    if (rorder) { free(rorder); }
     pointers = NULL;
     indice = NULL;
     value = NULL;
@@ -119,37 +121,6 @@ int SpMatrix::load_file(const char *filename) {
             printf("ERROR: cannot load order of A from %s\n", filename);
             return -1;
         }
-
-        /* reordering indice */
-        for(int i=0; i<ndim; i++) {
-            if ((indice[i] > nrow)||(indice[i]<=0)) {
-                printf("ERROR: invalid data in indice[%d] = %d.\n", i, indice[i]);
-            } else {
-                indice[i] = order[indice[i]-1];
-            }
-        }
-
-        /* create reverse order table */
-        rorder = (INT_T*)calloc(neq, sizeof(INT_T));
-        for(int i=0; i<nrow; i++) {
-            if ((order[i]-1 >= neq)||(order[i]<=0)) {
-                printf("ERROR: invalid data in order[%d] = %d.\n", i, order[i]);
-            } else {
-                rorder[order[i]-1] = i+1;
-            }
-        }
-#if 1
-        /* find max/min index */
-        maxgind = order[0];
-        mingind = order[0];
-        for(int i=1; i<nrow; i++) {
-            if (order[i] > maxgind) maxgind = order[i];
-            if (order[i] < mingind) mingind = order[i];
-        }
-#else
-        mingind = 0;
-        maxgind = 0;
-#endif
     } else {
         neq = nrow;
     }
@@ -164,6 +135,46 @@ int SpMatrix::load_file(const char *filename) {
  */
 SpDistMatrix::SpDistMatrix() {}
 SpDistMatrix::~SpDistMatrix() {}
+
+int SpDistMatrix::reordering() {
+    INT_T* newind = (INT_T*)calloc(sizeof(INT_T), ndim);
+
+    /* reordering indice */
+    if (!SPMATRIX_IS_REORDERED()) {
+        for(int i=0; i<ndim; i++) {
+            if ((indice[i] > nrow)||(indice[i]<=0)) {
+                printf("ERROR: invalid data in indice[%d] = %d.\n", i, indice[i]);
+            } else {
+                newind[i] = order[indice[i]-1];
+            }
+        }
+        ncol = neq;
+        if (selfAllocated) {
+            free(indice);
+        }
+        indice = newind;
+        type |= SPMATRIX_TYPE_REORDERED;
+    }
+
+    /* create reverse order table */
+    rorder = (INT_T*)calloc(neq, sizeof(INT_T));
+    for(int i=0; i<nrow; i++) {
+        if ((order[i]-1 >= neq)||(order[i]<=0)) {
+            printf("ERROR: invalid data in order[%d] = %d.\n", i, order[i]);
+        } else {
+            rorder[order[i]-1] = i+1;
+        }
+    }
+    /* find max/min index */
+    maxgind = order[0];
+    mingind = order[0];
+    for(int i=1; i<nrow; i++) {
+        if (order[i] > maxgind) maxgind = order[i];
+        if (order[i] < mingind) mingind = order[i];
+    }
+
+    return 0;
+}
 
 /* item list operation */
 struct list_item {
@@ -261,27 +272,6 @@ SpMatrix* SpDistMatrix::gather(SpDistMatrix** An, int nprocs) {
     TIMELOG(tl);
 
     SpMatrix* A = new SpMatrix();
-#if 0
-    for(int n=0; n<nprocs; n++) {
-        printf("******** rank %d ********\n", n);
-        //for(int i=0; i<An[n]->nrow; i++) {
-        for(int i=0; i<5; i++) {
-            for (int j=An[n]->pointers[i]; j<An[n]->pointers[i+1]; j++) {
-                //printf("A( %d, %d, %d ) = %lf\n", i+1, An[n]->order[i], An[n]->indice[j-1], An[n]->value[j-1]);
-                printf("A( %d, %d ) = %lf\n", i+1, An[n]->indice[j-1], An[n]->value[j-1]);
-            }
-        }
-        int num = 0;
-        for(int i=0; i<An[n]->neq; i++) {
-            if (An[n]->rorder[i] != 0) {
-                printf("rorderA[%d] = %d\n", i+1, An[n]->rorder[i]);
-                if (++num > 5) break;
-            }
-        }
-        printf("********** End ***********\n");
-    }
-    fflush(stdout);
-#endif
 
     /*
      * preprocess
@@ -326,57 +316,30 @@ SpMatrix* SpDistMatrix::gather(SpDistMatrix** An, int nprocs) {
     int k=0;
     for(int i=0; i<neq; i++) {
         A->pointers[i] = k+1;
-#if 0
-        if (duplex[i] == 1) {
-            int r = rank[i];
+        //printf("INFO: Overwrapped row (row=%d)\n", i);
+        struct sorted_list *tmplist = list_new();
+        for(int r=0; r<nprocs; r++) {
             int ii = An[r]->rorder[i];
-            for(int j=An[r]->pointers[ii-1]-1; j<An[r]->pointers[ii]-1; j++) {
-                A->indice[k] = An[r]->indice[j];
-                A->value[k] = An[r]->value[j];
-                k++;
-            }
-        } else if(duplex[i] > 1) {
-            for(int r=0; r<nprocs; r++) {
-                int ii = An[r]->rorder[i];
-                if (ii != 0) {
-                    for(int j=An[r]->pointers[ii-1]-1; j<An[r]->pointers[ii]-1; j++) {
-                        A->indice[k] = An[r]->indice[j];
-                        A->value[k] = An[r]->value[j];
-                        k++;
-                    }
+            if (ii != 0) {
+                for(int j=An[r]->pointers[ii-1]-1; j<An[r]->pointers[ii]-1; j++) {
+                    list_insert(tmplist, An[r]->indice[j], An[r]->value[j]);
+                    //printf("A%d(%d, %d) = %lf\n", r, i, An[r]->indice[j], An[r]->value[j]);
                 }
             }
-#if 0
-        } else if(duplex[i] == 0) {
-            printf("ERROR: Unexpected condition (row=%d)\n", i);
-#endif
-        } else {
-#endif
-            //printf("INFO: Overwrapped row (row=%d)\n", i);
-            struct sorted_list *tmplist = list_new();
-            for(int r=0; r<nprocs; r++) {
-                int ii = An[r]->rorder[i];
-                if (ii != 0) {
-                    for(int j=An[r]->pointers[ii-1]-1; j<An[r]->pointers[ii]-1; j++) {
-                        list_insert(tmplist, An[r]->indice[j], An[r]->value[j]);
-                        //printf("A%d(%d, %d) = %lf\n", r, i, An[r]->indice[j], An[r]->value[j]);
-                    }
-                }
-            }
+        }
 
-            //for(struct list_item* item = list_top(tmplist); item != NULL; item = item->next) {
-            for(struct list_item* item = list_top(tmplist); item != NULL;) {
-                struct list_item* next;
-                //printf("INFO: Insert A(%d, %d) = %lf\n", i, item->indice, item->value);
-                A->indice[k] = item->indice;
-                A->value[k] = item->value;
-                next = item->next;
-                free(item);
-                item = next;
-                k++;
-            }
-            list_free(tmplist);
-//        }
+        //for(struct list_item* item = list_top(tmplist); item != NULL; item = item->next) {
+        for(struct list_item* item = list_top(tmplist); item != NULL;) {
+            struct list_item* next;
+            //printf("INFO: Insert A(%d, %d) = %lf\n", i, item->indice, item->value);
+            A->indice[k] = item->indice;
+            A->value[k] = item->value;
+            next = item->next;
+            free(item);
+            item = next;
+            k++;
+        }
+        list_free(tmplist);
     }
     A->pointers[neq] = k+1;
     printf("Gather: ndim=%d, neq=%d\n", k, neq);
@@ -432,6 +395,8 @@ int SpDistMatrix::ConvertToDCSR() {
     pointers = newptr;
     indice = newind;
     value = newval;
+
+    type = SPMATRIX_TYPE_DCSR | SPMATRIX_TYPE_INDEX1 | SPMATRIX_TYPE_ASYMMETRIC;
     TIMELOG_END(tl, "ConverToDCSR");
 
     return 0;
