@@ -69,6 +69,7 @@ int VEServer::init(MPI_Comm comm) {
 void VEServer::fini() {
     if (rankmap) {
         free(rankmap);
+        rankmap = NULL;
     }
     ves_info.status = VES_ST_INIT;
 };
