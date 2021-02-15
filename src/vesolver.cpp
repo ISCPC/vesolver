@@ -102,15 +102,31 @@ int VESolver::hs_solve(SpMatrix& A, Vector& b, Vector& x, double res) {
 
     /* Preprocessing Phase */
     ierr = PHS_preprocess_rd(hnd, pointers, indice, value);
+    if (ierr != HS_RESULT_OK) {
+        fprintf(stderr, "ERROR: PHS_preprocess_rd failed with %d.\n", ierr);
+        exit(1);
+    }
 
     /* Numeric Factorization Phase */
     ierr = PHS_factorize_rd(hnd, pointers, indice, value);
+    if (ierr != HS_RESULT_OK) {
+        fprintf(stderr, "ERROR: PHS_factorize_rd failed with %d.\n", ierr);
+        exit(1);
+    }
 
     /* Solution Phase */
     ierr = PHS_solve_rd(hnd, pointers, indice, value, 1, b.value, x.value, &res);
+    if (ierr != HS_RESULT_OK) {
+        fprintf(stderr, "ERROR: PHS_solve_rd failed with %d.\n", ierr);
+        exit(1);
+    }
 
     /* Handle Finalization */
     ierr = PHS_finalize_handle(hnd);
+    if (ierr != HS_RESULT_OK) {
+        fprintf(stderr, "ERROR: PHS_finalize_handle failed with %d.\n", ierr);
+        exit(1);
+    }
 
     return 0;
 #else
@@ -384,15 +400,31 @@ int VESolver::hs_solve(SpDistMatrix& A, DistVector& b, Vector& x, double res) {
 
     /* Preprocessing Phase */
     ierr = PHS_preprocess_rd(hnd, pointers, indice, value);
+    if (ierr != HS_RESULT_OK) {
+        fprintf(stderr, "ERROR: PHS_preprocess_rd failed with %d.\n", ierr);
+        exit(1);
+    }
 
     /* Numeric Factorization Phase */
     ierr = PHS_factorize_rd(hnd, pointers, indice, value);
+    if (ierr != HS_RESULT_OK) {
+        fprintf(stderr, "ERROR: PHS_factorize failed with %d.\n", ierr);
+        exit(1);
+    }
 
     /* Solution Phase */
     ierr = PHS_solve_rd(hnd, pointers, indice, value, 1, b.value, x.value, &res);
+    if (ierr != HS_RESULT_OK) {
+        fprintf(stderr, "ERROR: PHS_solve_rd failed with %d (res=%le).\n", ierr, res);
+        exit(1);
+    }
 
     /* Handle Finalization */
     ierr = PHS_finalize_handle(hnd);
+    if (ierr != HS_RESULT_OK) {
+        fprintf(stderr, "ERROR: PHS_finalize_handle failed with %d.\n", ierr);
+        exit(1);
+    }
 
     return 0;
 #else
