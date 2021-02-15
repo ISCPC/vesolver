@@ -2,31 +2,71 @@
 
 nprocs=1
 nthreads=8
-RUN_ON_VE=1
+RUN_ON_VE=0
 
-# Solver
-export VESOLVER=BICGSTAB2
-#export VESOLVER=HS
-#export VESOLVER=DUMMY
+# Usage: run.sh [solver] [run_mode] {data_path}
+#
+# 1st parameter: solver
+#
+case "$1" in
+cg)
+    export VESOLVER=BICGSTAB2
+    ;;
 
-# Parallel Run mode
-#export VES_MODE=GATHER_ON_VH
-export VES_MODE=GATHER_ON_VE
-#export VES_MODE=SYMMETRIC
+hs)
+    export VESOLVER=HS
+    ;;
+    
+dum*)
+    export VESOLVER=DUMMY
+    ;;
 
+*)
+    export VESOLVER=BICGSTAB2
+    ;;
+esac
 
 #
+# get the number of parallels
 #
-#
-if [ "$1" != "" ]
+if [ "$3" != "" ]
 then
-    nprocs=$1
+    export VESOLVER_DATA_PATH=$3
+else
+    export VESOLVER_DATA_PATH=.
+fi
+nmat=`ls ${VESOLVER_DATA_PATH}/a*.bin | wc -l`
+
+if [ ${nmat} -le 0 ]; then
+    echo "ERROR: Matrix data not found"
+    exit
 fi
 
-if [ "$2" != "" ]
-then
-    nthreads=$2
-fi
+#
+# 2nd parameter: Rum mode
+#
+case "$2" in
+ve)
+    export VES_MODE=GATHER_ON_VE
+    export VESOLVER_NPARA=${nmat}
+    ;;
+    
+vh)
+    export VES_MODE=GATHER_ON_VH
+    ;;
+
+sym*)
+    export VES_MODE=SYMMETRIC
+    nprocs=${nmat}
+    nthreads=1
+    ;;
+
+*)
+    export VES_MODE=GATHER_ON_VE
+    export VESOLVER_NPARA=${nmat}
+    ;;
+esac
+
 
 ELMERPATH=../dist/ve/lib/elmersolver
 
