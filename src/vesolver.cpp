@@ -41,6 +41,8 @@ SOFTWARE.
 #include <mkl_cluster_sparse_solver.h>
 #endif
 
+//#define SANITY_CHECK 1
+
 /*
  * functions for HeteroSolver
  */
@@ -894,19 +896,28 @@ int VESolver::process(VES_request_t& req) {
 int test_gather_on_vh(VESolver& server, Vector& x, double res, int solver) {
     SpMatrix A;
     Vector b;
+    char infile[256];
     const char* file_a = "a.bin";
     const char* file_b = "b.bin";
     int cc = -1;
     int rank;
 
+    const char* mat_path = getenv("VESOLVER_DATA_PATH");
+    if (mat_path == NULL) {
+        mat_path = ".";
+    }
+    printf("INFO:test_gather_on_vh: the path to matrix and vector: %s\n", mat_path);
+
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if (rank == 0) {
-        if (A.load_file(file_a) < 0) {
+        snprintf(infile, 256, "%s/%s", mat_path, file_a);
+        if (A.load_file(infile) < 0) {
             fprintf(stderr, "ERROR: cannot load matrix A from %s\n", file_a);
             exit(1);
         }
-        if (b.load_file(file_b) < 0) {
+        snprintf(infile, 256, "%s/%s", mat_path, file_b);
+        if (b.load_file(infile) < 0) {
             fprintf(stderr, "ERROR: cannot load vector b from %s\n", file_b);
             exit(1);
         }
@@ -925,11 +936,23 @@ int test_gather_on_ve(VESolver& server, Vector& x, double res, int solver) {
     const char *prefix_a="a";
     const char *prefix_b="b";
 
+    const char* mat_path = getenv("VESOLVER_DATA_PATH");
+    if (mat_path == NULL) {
+        mat_path = ".";
+    }
+    printf("INFO:test_gather_on_ve: the path to matrix and vector: %s\n", mat_path);
+
+    char* env = getenv("VESOLVER_NPARA");
+    if (env != NULL) {
+        nprocs = atoi(env);
+        printf("INFO:test_gather_on_ve: set the number of parallels = %d\n", nprocs);
+    }
+
     An = (SpDistMatrix**)calloc(sizeof(SpMatrix*), nprocs);
     bn = (DistVector**)calloc(sizeof(Vector*), nprocs);
     for(int i=0; i<nprocs; i++) {
         An[i] = new SpDistMatrix();
-        snprintf(infile, 256, "%s%d.bin", prefix_a, i);
+        snprintf(infile, 256, "%s/%s%d.bin", mat_path, prefix_a, i);
         if (An[i]->load_file(infile) < 0) {
             fprintf(stderr, "ERROR: cannot load matrix A%d from %s\n", i, infile);
             exit(1);
@@ -937,7 +960,7 @@ int test_gather_on_ve(VESolver& server, Vector& x, double res, int solver) {
         An[i]->reordering();
 
         bn[i] = new DistVector();
-        snprintf(infile, 256, "%s%d.bin", prefix_b, i);
+        snprintf(infile, 256, "%s/%s%d.bin", mat_path, prefix_b, i);
         if (bn[i]->load_file(infile) < 0) {
             fprintf(stderr, "ERROR: cannot load vector b%d from %s\n", i, infile);
             exit(1);
@@ -973,10 +996,16 @@ int test_symmetric(VESolver& server, Vector& x, double res, int solver) {
     SpDistMatrix A;
     DistVector b;
 
+    const char* mat_path = getenv("VESOLVER_DATA_PATH");
+    if (mat_path == NULL) {
+        mat_path = ".";
+    }
+    printf("INFO:test_symmetric: the path to matrix and vector: %s\n", mat_path);
+
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     /* Load Matrix A */
-    snprintf(infile, 256, "%s%d.bin", prefix_a, rank);
+    snprintf(infile, 256, "%s/%s%d.bin", mat_path, prefix_a, rank);
     if (A.load_file(infile) < 0) {
         fprintf(stderr, "ERROR: cannot load matrix A from %s\n", infile);
         exit(1);
@@ -984,7 +1013,7 @@ int test_symmetric(VESolver& server, Vector& x, double res, int solver) {
     A.reordering();
 
     /* Load Vector b */
-    snprintf(infile, 256, "%s%d.bin", prefix_b, rank);
+    snprintf(infile, 256, "%s/%s%d.bin", mat_path, prefix_b, rank);
     if (b.load_file(infile) < 0) {
         fprintf(stderr, "ERROR: cannot load vector b from %s\n", infile);
         exit(1);
