@@ -25,6 +25,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <string.h>
 #include <unistd.h>
+#include <cmath>
 #include "vesolver_api.h"
 #include "vesolver.hpp"
 #include "timelog.h"
@@ -293,7 +294,7 @@ int VESolver::solve(int solver, SpDistMatrix **An, DistVector **bn, int n, Vecto
     SpMatrix *A = SpDistMatrix::gather(An, n);
     TIMELOG_END(tl, "gather_A");
 
-#if 0 /* Sanity check */
+#ifdef SANITY_CHECK
     printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
         A->nrow, A->ncol, A->neq, A->ndim, A->pointers[A->neq-1], A->pointers[A->neq]);
     for (int i=0; i<A->neq; i++) {
@@ -450,6 +451,7 @@ int VESolver::cpardiso_solve(SpDistMatrix& A, DistVector& b, Vector& x, double r
 #else
     iparm[0]=0;
     iparm[1]=3;
+    iparm[17]=-1;         // Output: Number of nonzeros in the factor LU
     iparm[39]=3;
     iparm[40]=A.mingind;
     iparm[41]=A.maxgind;
@@ -461,14 +463,21 @@ int VESolver::cpardiso_solve(SpDistMatrix& A, DistVector& b, Vector& x, double r
         &A.neq, A.value, A.pointers, A.indice,
         &perm, &nrhs, iparm, &msglvl,
         b.value, x.value, &comm, &ierr);
+    if (ierr != 0) {
+        printf("WARNING: cluster_sparse_solver failed (phase=%d, ierr=%d)\n",
+            phase, ierr);
+    }
 
-#if 1
     /* Perform factorization */
     phase = 22;
     cluster_sparse_solver(pt, &maxfct, &mnum, &mtype, &phase,
         &A.neq, A.value, A.pointers, A.indice,
         &perm, &nrhs, iparm, &msglvl,
         b.value, x.value, &comm, &ierr);
+    if (ierr != 0) {
+        printf("WARNING: cluster_sparse_solver failed (phase=%d, ierr=%d)\n",
+            phase, ierr);
+    }
 
     /* Perform solve */
     phase = 33;
@@ -476,15 +485,22 @@ int VESolver::cpardiso_solve(SpDistMatrix& A, DistVector& b, Vector& x, double r
         &A.neq, A.value, A.pointers, A.indice,
         &perm, &nrhs, iparm, &msglvl,
         b.value, x.value, &comm, &ierr);
-
+    if (ierr != 0) {
+        printf("WARNING: cluster_sparse_solver failed (phase=%d, ierr=%d)\n",
+            phase, ierr);
+    }
+#if 1
     /* Finalization */
     phase = -1;
     cluster_sparse_solver(pt, &maxfct, &mnum, &mtype, &phase,
         &A.neq, A.value, A.pointers, A.indice,
         &perm, &nrhs, iparm, &msglvl,
         b.value, x.value, &comm, &ierr);
+    if (ierr != 0) {
+        printf("WARNING: cluster_sparse_solver failed (phase=%d, ierr=%d)\n",
+            phase, ierr);
+    }
 #endif
-
     return 0;
 #else /* WITH_PARDISO */
     printf("ERROR: CPardiso is not enabled.\n");
@@ -530,6 +546,21 @@ int VESolver::solve(int solver, SpDistMatrix& A, DistVector& b, Vector& x, doubl
     int cc;
     TIMELOG(tl);
 
+#ifdef SANITY_CHECK
+    for (int i=0; i<A.ndim; i++) {
+        if (std::isnan(A.value[i])) {
+            printf("WARNING:VESolver[%d]::solve: Detect A[%d] == NaN (%lf)\n", myrank, i, A.value[i]);
+            break;
+        }
+    }
+    for (int i=0; i<b.size; i++) {
+        if (std::isnan(b.value[i])) {
+            printf("WARNING:VESolver[%d]::solve: Detect b[%d] == NaN (%lf)\n", myrank, i, b.value[i]);
+            break;
+        }
+    }
+#endif
+
     TIMELOG_START(tl);
     switch(solver) {
         case VESOLVER_HS:
@@ -555,6 +586,14 @@ int VESolver::solve(int solver, SpDistMatrix& A, DistVector& b, Vector& x, doubl
     }
     TIMELOG_END(tl, "vesolver_solve");
 
+#ifdef SANITY_CHECK
+    for (int i=0; i<x.size; i++) {
+        if (std::isnan(x.value[i])) {
+            printf("WARNING:VESolver[%d]::solve: Detect x[%d] == NaN (%lf)\n", myrank, i, x.value[i]);
+            break;
+        }
+    }
+#endif
     return cc;
 }
 
@@ -704,7 +743,7 @@ int VESolver::process_gather_on_vh(VES_request_t& req) {
         return -1;
     } 
 
-#if 0 /* Sanity check */
+#ifdef SANITY_CHECK
     printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
         A.nrow, A.ncol, A.neq, A.ndim, A.pointers[A.neq-1], A.pointers[A.neq]);
     for (int i=0; i<A.neq; i++) {
@@ -784,7 +823,10 @@ int VESolver::process_symmetric(VES_request_t& req) {
 
     receive_matrix_info(myrank, &A);
     receive_matrix_data(myrank, &A, &b);
-    x.alloc(A.neq);
+    if (x.alloc(A.neq) < 0) {
+        printf("ERROR:VESolver[%d]::process: Memory allocation failed\n", myrank);
+        return -1;
+    }
     cc = solve(payload->solver, A, b, x, payload->res);
     send_result(myrank, x);
 
@@ -917,7 +959,10 @@ int test_symmetric(VESolver& server, Vector& x, double res, int solver) {
     }
 
     /* Allocate Vector x */
-    x.alloc(A.neq);
+    if (x.alloc(A.neq) < 0) {
+        printf("ERROR:VESolver[%d]::process: Memory allocation failed\n", rank);
+        exit(1);
+    }
 
     printf("INFO:test_symmetric[%d]: A.nrow=%d A.neq=%d A.mingind=%d A.maxgind=%d\n", 
         rank, A.nrow, A.neq, A.mingind, A.maxgind);

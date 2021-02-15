@@ -399,7 +399,7 @@ int SpDistMatrix::ConvertToDCSR() {
     value = newval;
 
     type = SPMATRIX_TYPE_DCSR | SPMATRIX_TYPE_INDEX1 | SPMATRIX_TYPE_ASYMMETRIC;
-    TIMELOG_END(tl, "ConverToDCSR");
+    TIMELOG_END(tl, "ConvertToDCSR");
 
     return 0;
 }
