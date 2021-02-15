@@ -2,7 +2,7 @@
 
 nprocs=1
 nthreads=8
-RUN_ON_VE=0
+RUN_ON_VE=1
 
 # Usage: run.sh [solver] [run_mode] {data_path}
 #
