@@ -60,7 +60,8 @@ if [ $? -eq 1 ]; then
 fi
 
 cd build
-cmake3 ${OPTIONS} -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH} ../elmerfem
+cmake3 ${OPTIONS} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH} ../elmerfem
+#cmake3 ${OPTIONS} -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=${INSTALL_PATH} ../elmerfem
 
 if [ $? -eq 0 ]; then
     echo "Start building elmerFEM... Watch _make.log!"

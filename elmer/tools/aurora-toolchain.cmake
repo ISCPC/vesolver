@@ -6,9 +6,20 @@ SET(CMAKE_C_COMPILER ${SXAT_NCC_PATH}/ncc)
 SET(CMAKE_CXX_COMPILER ${SXAT_NCC_PATH}/nc++)
 SET(CMAKE_Fortran_COMPILER ${SXAT_NCC_PATH}/nfort)
 
-SET(CMAKE_C_FLAGS "-O2 -g -lcblas -lblas_openmp -fopenmp"  CACHE STRING "")
-SET(CMAKE_CXX_FLAGS "-O2 -g -lcblas -lblas_openmp -fopenmp" CACHE STRING "")
-SET(CMAKE_Fortran_FLAGS "-O2 -g -llapack -lblas_openmp -fopenmp" CACHE STRING "")
+#SET(CMAKE_C_FLAGS "-O2 -g -lcblas -lblas_openmp -fopenmp"  CACHE STRING "")
+#SET(CMAKE_CXX_FLAGS "-O2 -g -lcblas -lblas_openmp -fopenmp" CACHE STRING "")
+#SET(CMAKE_Fortran_FLAGS "-O2 -g -llapack -lblas_openmp -fopenmp" CACHE STRING "")
+#SET(CMAKE_C_FLAGS_RELEASE "-g"  CACHE STRING "")
+#SET(CMAKE_CXX_FLAGS_RELEASE "-g" CACHE STRING "")
+#SET(CMAKE_Fortran_FLAGS_RELEASE "-g" CACHE STRING "")
+
+SET(CMAKE_C_FLAGS_DEBUG "-O0"  CACHE STRING "")
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0" CACHE STRING "")
+SET(CMAKE_Fortran_FLAGS_DEBUG "-O0" CACHE STRING "")
+
+SET(CMAKE_C_FLAGS "-g -lcblas -lblas_openmp -fopenmp"  CACHE STRING "")
+SET(CMAKE_CXX_FLAGS "-g -lcblas -lblas_openmp -fopenmp" CACHE STRING "")
+SET(CMAKE_Fortran_FLAGS "-g -llapack -lblas_openmp -fopenmp" CACHE STRING "")
 
 SET(BLAS_LIBRARIES ${SXAT_NLC_LIBRARY_PATH}/libblas_openmp.so)
 SET(LAPACK_LIBRARIES ${SXAT_NLC_LIBRARY_PATH}/liblapack.so)

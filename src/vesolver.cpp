@@ -24,6 +24,7 @@ SOFTWARE.
 #include <cstdio>
 #include <cstdlib>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 #include <cmath>
 #include "vesolver_api.h"
@@ -40,6 +41,9 @@ SOFTWARE.
 #include <mkl.h>
 #include <mkl_cluster_sparse_solver.h>
 #endif
+
+#include <sys/mman.h>
+#include <errno.h>
 
 //#define SANITY_CHECK 1
 
@@ -313,25 +317,25 @@ int VESolver::solve(int solver, SpDistMatrix **An, DistVector **bn, int n, Vecto
     TIMELOG_END(tl, "gather_A");
 
 #ifdef SANITY_CHECK
-    printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
-        A->nrow, A->ncol, A->neq, A->ndim, A->pointers[A->neq-1], A->pointers[A->neq]);
+    printf("INFO:VESolver[%d]:solve: A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
+        myrank, A->nrow, A->ncol, A->neq, A->ndim, A->pointers[A->neq-1], A->pointers[A->neq]);
     for (int i=0; i<A->neq; i++) {
         if ((A->pointers[i] <= 0)||(A->pointers[i] > A->ndim+1)) {
-            printf("Invalid pointer A[%d]=%d\n", i, A->pointers[i]);
+            printf("INFO:VESolver[%d]:solve: Invalid pointer A[%d]=%d\n", myrank, i, A->pointers[i]);
         }
 
         int k = A->pointers[i]-1;
         int prev = A->indice[k];
         for (int j=A->pointers[i]; j<A->pointers[i+1]-1; j++) {
             if (A->indice[j] <= prev) {
-                printf("Invalid indice A[%d, %d]=%d < %d\n", i, j, A->indice[j], prev);
+                printf("INFO:VESolver[%d]:solve: Invalid indice A[%d, %d]=%d < %d\n", myrank, i, j, A->indice[j], prev);
             }
             prev = A->indice[j];
         }
     }
     for (int i=0; i<A->ndim; i++) {
         if ((A->indice[i] <= 0)||(A->indice[i] > A->ncol)) {
-            printf("Invalid indice A[%d]=%d\n", i, A->indice[i]);
+            printf("INFO:VESolver[%d]:solve: Invalid indice A[%d]=%d\n", myrank, i, A->indice[i]);
         }
     }
 #endif
@@ -678,23 +682,44 @@ inline int VESolver::receive_matrix_data(int src, SpMatrix* A, Vector* b) {
     if (cc != 0) {
         printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
     }
+    //printf("INFO:Receive:value status(count=%d, cancelled=%d, source=%d, tag=%d, error=%d\n",
+    //    status.count, status.cancelled, status.MPI_SOURCE, status.MPI_TAG, status.MPI_ERROR);
+
     cc = MPI_Recv(A->indice, A->ndim, MPI_INTEGER, src, VES_MATDATA_TAG, ves_comm, &status);
     if (cc != 0) {
         printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
     }
-    cc = MPI_Recv(A->pointers, A->nrow+1, MPI_INTEGER, src, VES_MATDATA_TAG, ves_comm, &status);
+    //printf("INFO:Receive:indice status(count=%d, cancelled=%d, source=%d, tag=%d, error=%d\n",
+    //    status.count, status.cancelled, status.MPI_SOURCE, status.MPI_TAG, status.MPI_ERROR);
+
+    cc = MPI_Recv(A->pointers, (A->nrow)+1, MPI_INTEGER, src, VES_MATDATA_TAG, ves_comm, &status);
     if (cc != 0) {
         printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
     }
+    //printf("INFO:Receive:pointers status(count=%d, cancelled=%d, source=%d, tag=%d, error=%d\n",
+    //    status.count, status.cancelled, status.MPI_SOURCE, status.MPI_TAG, status.MPI_ERROR);
+
+    // Recieve Matrix b
+    cc = MPI_Recv(b->value, A->nrow, MPI_DOUBLE, src, VES_MATDATA_TAG, ves_comm, &status);
+    if (cc != 0) {
+        printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
+    }
+    //printf("INFO:Receive:b status(count=%d, cancelled=%d, source=%d, tag=%d, error=%d\n",
+    //    status.count, status.cancelled, status.MPI_SOURCE, status.MPI_TAG, status.MPI_ERROR);
 
 #if 0
     for(int i=0; i<5; i++) {
-        printf("INFO:A[%d] = (%d, %d, %lf)\n", i, A->pointers[i], A->indice[i], A->value[i]);
+        printf("INFO:Receive:Ai[%d] = %d %d %lf %lf\n", i, A->pointers[i],
+            A->indice[i], A->value[i], b->value[i]);
     }
-    fflush(stdout);
+    for(int i=A->nrow-5; i<A->nrow; i++) {
+        printf("INFO:Receive:Ai[%d] = %d %d %lf %lf\n", i, A->pointers[i],
+            A->indice[i], A->value[i], b->value[i]);
+    }
+    for(int i=A->ndim-5; i<A->ndim; i++) {
+        printf("INFO:Receive:Aj[%d] = (%d, %lf)\n", i, A->indice[i], A->value[i]);
+    }
 #endif
-    // Recieve Matrix b
-    cc = MPI_Recv(b->value, A->nrow, MPI_DOUBLE, src, VES_MATDATA_TAG, ves_comm, &status);
 
     return cc;
 }
@@ -734,12 +759,10 @@ inline int VESolver::receive_matrix_data(int src, SpDistMatrix* A, DistVector* b
     if (cc != 0) {
         printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
     }
-    //if (A->maxgind == 0) {
-        cc = MPI_Recv(A->rorder, A->neq, MPI_INTEGER, src, VES_MATDATA_TAG, ves_comm, &status);
-        if (cc != 0) {
-            printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
-        }
-    //}
+    cc = MPI_Recv(A->rorder, A->neq, MPI_INTEGER, src, VES_MATDATA_TAG, ves_comm, &status);
+    if (cc != 0) {
+        printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
+    }
 
 #if 0
     for(int i=0; i<5; i++) {
@@ -778,25 +801,33 @@ int VESolver::process_gather_on_vh(VES_request_t& req) {
     } 
 
 #ifdef SANITY_CHECK
-    printf("A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
-        A.nrow, A.ncol, A.neq, A.ndim, A.pointers[A.neq-1], A.pointers[A.neq]);
+    int nerr=0;
+    printf("INFO:VESolver[%d]:process_gather_on_vh: A: nrow=%d, ncol=%d, neq=%d, ndim=%d, %d, %d\n", 
+        myrank, A.nrow, A.ncol, A.neq, A.ndim, A.pointers[A.neq-1], A.pointers[A.neq]);
     for (int i=0; i<A.neq; i++) {
         if ((A.pointers[i] <= 0)||(A.pointers[i] > A.ndim+1)) {
-            printf("Invalid pointer A[%d]=%d\n", i, A.pointers[i]);
+            printf("INFO:VESolver[%d]:process_gather_on_vh: Invalid pointer A[%d]=%d\n", myrank, i, A.pointers[i]);
+            nerr++;
         }
 
         int k = A.pointers[i]-1;
         int prev = A.indice[k];
         for (int j=A.pointers[i]; j<A.pointers[i+1]-1; j++) {
             if (A.indice[j] <= prev) {
-                printf("Invalid indice A[%d, %d]=%d < %d\n", i, j, A.indice[j], prev);
+                printf("INFO:VESolver[%d]:process_gather_on_vh: Invalid indice A[%d, %d]=%d < %d\n", myrank, i, j, A.indice[j], prev);
+                nerr++;
             }
             prev = A.indice[j];
+        }
+        if (nerr > 100) {
+            send_result(x);
+            return -1;
         }
     }
     for (int i=0; i<A.ndim; i++) {
         if ((A.indice[i] <= 0)||(A.indice[i] > A.ncol)) {
-            printf("Invalid indice A[%d]=%d\n", i, A.indice[i]);
+            printf("INFO:VESolver[%d]:process_gather_on_vh: Invalid indice A[%d]=%d\n", myrank, i, A.indice[i]);
+            nerr++;
         }
     }
 #endif

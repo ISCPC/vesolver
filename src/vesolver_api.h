@@ -56,11 +56,19 @@ extern "C" {
 #ifdef __cplusplus
 #include "veserver.hpp"
 #include "SpMatrix.hpp"
+#include <stdlib.h>
 
 class VESolverAPI : public VEServerAPI {
 public:
-    VESolverAPI() {}
-    ~VESolverAPI() {}
+    VESolverAPI() {
+        buffer = (int*)malloc(0x10000000);
+        if(buffer == NULL) {
+            exit(-1);
+        }
+    }
+    ~VESolverAPI() {
+        free(buffer);
+    }
 
     int solve(int solver, SpMatrix& A, Vector& b, Vector& x, double res);
     int solve(int solver, SpDistMatrix **An, DistVector **bn, int n, Vector& x, double res);
@@ -68,6 +76,7 @@ public:
     int solve_gather_on_vh(int solver, int32_t neq, int32_t nrows, int32_t *pointers, int32_t *indice, double *value, int32_t *rorder, double *b, double *x, double res);
 
 private:
+    int* buffer;
     int send_matrix_info(SpMatrix& A);
     int send_matrix_info(int rank, SpDistMatrix& A);
     int send_matrix_data(SpMatrix& A, Vector& b);

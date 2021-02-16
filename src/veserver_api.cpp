@@ -83,7 +83,7 @@ int VEServerAPI::activate(MPI_Comm comm, int nprocs) {
         }
         MPI_Intercomm_create(cl_comm, 0, MPI_COMM_WORLD, ves_info.server_leader, VES_ACTIVATE_TAG, &ves_comm);
         MPI_Bcast(&ves_info, sizeof(VES_info_t), MPI_BYTE, 0, ves_comm);
-        printf("INFO:VEServerAPI::activate: VEServer activated. (%d/%d processes)\n", ves_info.nactives, ves_info.nprocs);
+        //printf("INFO:VEServerAPI::activate: VEServer activated. (%d/%d processes)\n", ves_info.nactives, ves_info.nprocs);
     } else {
         ves_info.status = VES_ST_INACTIVE;
     }
