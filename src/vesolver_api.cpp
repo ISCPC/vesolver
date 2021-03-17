@@ -116,6 +116,7 @@ int VESolverAPI::send_matrix_data(SpMatrix& A, Vector& b) {
     cc = MPI_Send(buffer, A.ndim, MPI_INTEGER, 0, VES_MATDATA_TAG, ves_comm);
     
     // Send pointers of Matrix A
+    printf("INFO:send_matrix_data: data location of A.pointers=0x%08lx\n", A.pointers);
     bcopy(A.pointers, buffer, sizeof(INT_T)*(A.nrow+1));
     cc = MPI_Send(buffer, (A.nrow)+1, MPI_INTEGER, 0, VES_MATDATA_TAG, ves_comm);
 
@@ -132,6 +133,7 @@ int VESolverAPI::send_matrix_data(SpMatrix& A, Vector& b) {
 int VESolverAPI::send_matrix_data(int rank, SpDistMatrix& A, DistVector& b) {
     int cc;
 
+#if 0
     // Send Matrix A
     cc = MPI_Send(A.value, A.ndim, MPI_DOUBLE, rank, VES_MATDATA_TAG, ves_comm);
     cc = MPI_Send(A.indice, A.ndim, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
@@ -140,6 +142,29 @@ int VESolverAPI::send_matrix_data(int rank, SpDistMatrix& A, DistVector& b) {
 
     // Send Matrix b
     cc = MPI_Send(b.value, A.nrow, MPI_DOUBLE, rank, VES_MATDATA_TAG, ves_comm);
+#else
+    // Send value of Matrix A
+    bcopy(A.value, buffer, sizeof(double)*(A.ndim));
+    cc = MPI_Send(buffer, A.ndim, MPI_DOUBLE, rank, VES_MATDATA_TAG, ves_comm);
+
+    // Send indice of Matrix A
+    bcopy(A.indice, buffer, sizeof(INT_T)*(A.ndim));
+    cc = MPI_Send(buffer, A.ndim, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
+    
+    // Send pointers of Matrix A
+    bcopy(A.pointers, buffer, sizeof(INT_T)*(A.nrow+1));
+    cc = MPI_Send(buffer, (A.nrow)+1, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
+
+    // Send rorder of Matrix A
+    //bcopy(A.rorder, buffer, sizeof(INT_T)*(A.neq));
+    //cc = MPI_Send(buffer, A.neq, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
+    bcopy(A.order, buffer, sizeof(INT_T)*(A.nrow));
+    cc = MPI_Send(buffer, A.nrow, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
+
+    // Send Vector b
+    bcopy(b.value, buffer, sizeof(double)*(A.nrow));
+    cc = MPI_Send(buffer, A.nrow, MPI_DOUBLE, rank, VES_MATDATA_TAG, ves_comm);
+#endif
 
     return cc;
 }

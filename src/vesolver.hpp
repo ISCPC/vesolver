@@ -54,6 +54,7 @@ private:
     int hs_solve(SpMatrix& A, Vector& b, Vector& x, double res);
     int pardiso_solve(SpMatrix& A, Vector& b, Vector& x, double res); 
     int elmer_solve(SpMatrix& A, Vector& b, Vector& x, double res);
+    int iter_solve(SpMatrix& A, Vector& b, Vector& x, double res);
     int dummy_solve(SpMatrix& A, Vector& b, Vector& x, double res);
     int hs_solve(SpDistMatrix& A, DistVector& b, Vector& x, double res);
     int cpardiso_solve(SpDistMatrix& A, DistVector& b, Vector& x, double res);

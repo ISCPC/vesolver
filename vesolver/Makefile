@@ -45,7 +45,7 @@ DISTDIR = ../dist/ve
 CFLAGS += -I$(SRCDIR)
 #CSRCS = $(SRCDIR)/common.c $(SRCDIR)/solver.c $(SRCDIR)/vesolver.c
 #CXXSRCS = $(SRCDIR)/veserver.cpp $(SRCDIR)/vesolver.cpp
-CXXSRCS = veserver.cpp vesolver.cpp
+CXXSRCS = veserver.cpp vesolver.cpp itersolver.cpp
 
 ###################
 # Common Libraries
@@ -61,8 +61,8 @@ CXXSRCS += SpMatrix.cpp
 # for HeteroSolver
 ###################
 ifeq ($(WITH_AURORA),true)
-CFLAGS += -DHETEROSOLVER
-CXXFLAGS += -DHETEROSOLVER
+CFLAGS += -DHETEROSOLVER -DSXAT
+CXXFLAGS += -DHETEROSOLVER -DSXAT
 LDFLAGS += -lheterosolver_mpi_openmp -lblas_sequential
 LDFLAGS += -lsblas_openmp
 endif

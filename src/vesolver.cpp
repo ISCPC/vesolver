@@ -30,6 +30,7 @@ SOFTWARE.
 #include "vesolver_api.h"
 #include "vesolver.hpp"
 #include "timelog.h"
+#include "itersolver.hpp"
 #ifdef ELMERSOLVER
 #include "elmerSolver.h"
 #endif
@@ -46,6 +47,73 @@ SOFTWARE.
 #include <errno.h>
 
 //#define SANITY_CHECK 1
+
+/*
+ * functions for Itersolver
+ */
+void convert2coo(SpDistMatrix** An, int nprocs, int *nrow, int *ndim, 
+    int** rows, int** cols, double** values) {
+
+    *ndim = 0;
+    for(int r=0; r<nprocs; r++) {
+        *ndim += An[r]->ndim;
+    }
+
+    int* iarow = (INT_T*)calloc(sizeof(INT_T),*ndim);
+    int* iacol = (INT_T*)calloc(sizeof(INT_T),*ndim);
+    double* aval = (double*)calloc(sizeof(double),*ndim);
+
+    int kn[256];
+    kn[0] = 0;
+    for(int r=1; r<nprocs; r++) {
+        kn[r] = kn[r-1] + An[r-1]->ndim;
+    }
+
+    //#pragma omp parallel for
+    for(int r=0; r<nprocs; r++) {
+        int k = kn[r];
+        for(int i=0; i<An[r]->nrow; i++) {
+            for(int j=An[r]->pointers[i]-1; j<An[r]->pointers[i+1]-1; j++) {
+                iarow[k] = An[r]->order[i];
+#if 1
+                iacol[k] = An[r]->indice[j];
+#else
+                iacol[k] = An[r]->order[An[r]->indice[j]-1];
+#endif
+                aval[k] = An[r]->value[j];
+                //printf("INFO: A%d(%d->%d, %d) = %lf\n", r, i, iarow[k], iacol[k], aval[k]); 
+                k++;
+            }
+        }
+    }
+
+    *nrow = An[0]->neq;
+    *rows = iarow;
+    *cols = iacol;
+    *values = aval;
+}
+
+double* reorder(DistVector** bn, int nprocs, SpDistMatrix** An) {
+    double* b = (double*)calloc(sizeof(double), An[0]->neq);
+
+#if 1
+    for(int r=0; r<nprocs; r++) {
+        for(int i=0; i<bn[r]->size; i++) {
+            b[An[r]->order[i]-1] += bn[r]->value[i];
+        }
+    }
+#else
+    for(int i=0; i<An[0]->neq; i++) {
+        for(int r=0; r<nprocs; r++) {
+            int ii = An[r]->rorder[i];
+            if (ii != 0) {
+                b[i] += bn[r]->value[ii-1];
+            }
+        }
+    }
+#endif
+    return b;
+}
 
 /*
  * functions for HeteroSolver
@@ -252,6 +320,15 @@ int VESolver::elmer_solve(SpMatrix& A, Vector& b, Vector& x, double res) {
 }
 
 /*
+ * functions for IterSolver
+ */
+int VESolver::iter_solve(SpMatrix& A, Vector& b, Vector& x, double res) {
+    printf("INFO:VESolver[%d]: Solving the system of equations using iterative solver on VE.\n\n", myrank);
+
+    return itersolver(A.ncol, A.ndim, A.pointers, A.indice, A.value, b.value, x.value, res);
+}
+
+/*
  * functions for Dummy Solver (for testing)
  */
 int VESolver::dummy_solve(SpMatrix& A, Vector& b, Vector& x, double res) {
@@ -292,7 +369,8 @@ int VESolver::solve(int solver, SpMatrix& A, Vector& b, Vector& x, double res) {
             break;
 
         case VESOLVER_BICGSTAB2:
-            cc = elmer_solve(A, b, x, res);
+            //cc = elmer_solve(A, b, x, res);
+            cc = iter_solve(A, b, x, res);
             break;
 
         case VESOLVER_DUMMY:
@@ -309,6 +387,7 @@ int VESolver::solve(int solver, SpMatrix& A, Vector& b, Vector& x, double res) {
 }
 
 int VESolver::solve(int solver, SpDistMatrix **An, DistVector **bn, int n, Vector& x, double res) {
+#if 0
     int cc=-1;
     TIMELOG(tl);
 
@@ -351,6 +430,33 @@ int VESolver::solve(int solver, SpDistMatrix **An, DistVector **bn, int n, Vecto
      */
     delete A;
     delete b;
+#else
+    int nrow, ndim;
+    int *arows, *acols;
+    double *avals;
+    TIMELOG(tl);
+    int cc=0;
+
+    TIMELOG_START(tl);
+    convert2coo(An, n, &nrow, &ndim, &arows, &acols, &avals);
+    TIMELOG_END(tl, "convert2coo");
+
+#if 1
+    TIMELOG_START(tl);
+    double* b = reorder(bn, n, An);
+    TIMELOG_END(tl, "gather_b");
+
+    TIMELOG_START(tl);
+    cc = itersolver_coo(nrow, ndim, arows, acols, avals, b, x.value, res);
+    TIMELOG_END(tl, "itersolver");
+
+    free(b);
+#else
+    for(int i=0; i<An[0]->neq; i++) {
+        x.value[i] = 0.0;
+    }
+#endif
+#endif
 
     return cc;
 }
@@ -732,12 +838,19 @@ inline int VESolver::receive_matrix_data(int src, SpDistMatrix* A, DistVector* b
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
         return -1;
     }
-
+#if 0
     A->rorder = (INT_T*)calloc(A->neq, sizeof(INT_T));
     if (A->rorder == NULL) {
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
         return -1;
     }
+#else
+    A->order = (INT_T*)calloc(A->nrow, sizeof(INT_T));
+    if (A->order == NULL) {
+        printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
+        return -1;
+    }
+#endif
 
     if (b->alloc(A->nrow)) {
         printf("ERROR: Memory allocation error.(%s:%d)\n", __FILE__, __LINE__);
@@ -759,10 +872,17 @@ inline int VESolver::receive_matrix_data(int src, SpDistMatrix* A, DistVector* b
     if (cc != 0) {
         printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
     }
+#if 0
     cc = MPI_Recv(A->rorder, A->neq, MPI_INTEGER, src, VES_MATDATA_TAG, ves_comm, &status);
     if (cc != 0) {
         printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
     }
+#else
+    cc = MPI_Recv(A->order, A->nrow, MPI_INTEGER, src, VES_MATDATA_TAG, ves_comm, &status);
+    if (cc != 0) {
+        printf("ERROR: MPI_Recv failed.(%s:%d)\n", __FILE__, __LINE__);
+    }
+#endif
 
 #if 0
     for(int i=0; i<5; i++) {
@@ -1073,7 +1193,7 @@ int test_symmetric(VESolver& server, Vector& x, double res, int solver) {
 void test(VESolver &server) {
     int cc=-1;
     char* env;
-    double res = 1.0e-13;
+    double res = 1.0e-10;
     int solver = VESOLVER_BICGSTAB2;
     int mode = VES_MODE_GATHER_ON_VH;
     Vector x;
