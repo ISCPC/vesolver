@@ -6,12 +6,13 @@ WITH_AURORA=true
 #
 # Enable/Disable ElmerFEM solver support
 #
-WITH_ELMERSOLVER=true
+WITH_ELMERSOLVER=false
 
 #
 # Enable/Disable PARDISO
 #
-WITH_MKL=true
+WITH_MKL=false
+WITH_MKL_STATIC=true
 
 WITH_MPI=false
 
@@ -70,15 +71,24 @@ endif
 ###################
 # for Pardiso
 ###################
-ifeq ($(WITH_MKL),true)
 ifeq ($(WITH_AURORA),false)
+ifeq ($(WITH_MKL),true)
 CFLAGS += -DWITH_PARDISO -DMKL_SBLAS
 CXXFLAGS += -DWITH_PARDISO -DMKL_SBLAS
 
 INTEL_LIB = /opt/intel/lib/intel64
 MKL_LIB = /opt/intel/mkl/lib/intel64
 MKL_INCLUDE = /opt/intel/mkl/include
-CMPLR_PATH = /opt/intel/compilers_and_libraries/linux/lib/intel64
+ifeq ($(WITH_MKL_STATIC),true)
+	CMPLR_PATH = /opt/intel/compilers_and_libraries/linux/lib/intel64
+else
+	LDFLAGS += -L$(INTEL_LIB) -L$(MKL_LIB)
+	LDFLAGS += -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_intel_thread
+	LDFLAGS += -lmkl_core -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64
+	LDFLAGS += -lmkl_lapack95_lp64 -lmkl_blas95_lp64 -lmkl_sequential
+	LDFLAGS += -lmkl_intel_lp64 -liomp5 -lmkl_rt
+#LDFLAGS += -llapack -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5
+endif
 
 #LDFLAGS += -L$(INTEL_LIB) -L$(MKL_LIB)
 #LDFLAGS += -llapack -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5
@@ -86,8 +96,10 @@ CMPLR_PATH = /opt/intel/compilers_and_libraries/linux/lib/intel64
 CFLAGS += -I $(MKL_INCLUDE)
 CXXFLAGS += -I $(MKL_INCLUDE)
 FFLAGS += -I $(MKL_INCLUDE)
-endif # WITH_AURORA
+else
+LDFLAGS += -lopenblas
 endif # WITH_MKL
+endif # WITH_AURORA
 
 ###################
 # for ElmerSolver
@@ -148,6 +160,7 @@ ifeq ($(WITH_AURORA),true)
 	mpinfort $(FCFLAGS) $(LDOPT) $(LDFLAGS) -cxxlib -o $@ $^
 else
 ifeq ($(WITH_MKL),true)
+ifeq ($(WITH_MKL_STATIC),true)
 	$(CXX) $(CXXFLAGS) -o $@ $^ \
 	-Wl,--start-group \
 	$(INTEL_LIB)/libiomp5.a \
@@ -163,6 +176,10 @@ ifeq ($(WITH_MKL),true)
 	$(MKL_LIB)/libmkl_intel_lp64.a \
 	-Wl,--end-group \
 	-L$(CMPLR_PATH) -lpthread -lm -ldl -lc $(LDFLAGS)
+else
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ \
+	-lpthread -lm -ldl -lc
+endif
 else
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 endif

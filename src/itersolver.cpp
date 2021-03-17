@@ -7,7 +7,9 @@
 #include <stdint.h>
 #include "itersolver.hpp"
 #include <omp.h>
+#ifdef SXAT
 #include <sblas.h>
+#endif
 #include "timelog.h"
 
 #define HUTI_MAXIT          1000
@@ -160,7 +162,9 @@ private:
     double* values = NULL;
     int* iarow = NULL;
 
+#ifdef SXAT
     sblas_handle_t handle; 
+#endif
 };
 
 static int solve(Matrix& A, double *b, double *x, double tolerance) {
