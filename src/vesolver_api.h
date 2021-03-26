@@ -43,11 +43,7 @@ extern "C" {
     int vesolver_activate_f(int comm, int nprocs);
     int vesolver_deactivate();
     int vesolver_solve(int solver, int32_t mtype, int32_t neq, int32_t *pointers, int32_t *indice, double *value, double *b, double *x, double res);
-    int vesolver_psolve(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, int32_t *pointers, int32_t *indice, double *value, int32_t *rorder, double *b, double *x, double res);
-#if 0
-    int vesolver_psolve2(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, int32_t nl, int32_t nt, int32_t *pointers, int32_t *indice, double *value, int32_t *rorder, double *b, double *x, double res);
-    int vesolver_psolve_dcsr(int32_t mode, int32_t solver, int32_t neq, int32_t *pointers, int32_t *indice, double *value, int32_t nl, int32_t nt, double *b, double *x, double res);
-#endif
+    int vesolver_psolve(int32_t mode, int32_t solver, int32_t neq, int32_t nrows, int32_t *pointers, int32_t *indice, double *value, int32_t *order, double *b, double *x, double res);
 
 #ifdef __cplusplus
 }
