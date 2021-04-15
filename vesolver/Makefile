@@ -66,6 +66,7 @@ CFLAGS += -DHETEROSOLVER -DSXAT
 CXXFLAGS += -DHETEROSOLVER -DSXAT
 LDFLAGS += -lheterosolver_mpi_openmp -lblas_sequential
 LDFLAGS += -lsblas_openmp
+LDFLAGS += -lcblas
 endif
 
 ###################
@@ -126,9 +127,9 @@ LDFLAGS += -lparpack -lnc++
 else
 #LDFLAGS += -lmpi_stubs
 endif
-LDFLAGS += -lcblas -llapack -lblas_openmp
+LDFLAGS += -llapack -lblas_openmp
 #
-else # WIH_AURORA
+else # WITH_AURORA
 FFLAGS += -J $(ELMER_MOD_PATH)
 endif # WITH_AURORA
 

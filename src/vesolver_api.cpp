@@ -138,7 +138,8 @@ int VESolverAPI::send_matrix_data(int rank, SpDistMatrix& A, DistVector& b) {
     cc = MPI_Send(A.value, A.ndim, MPI_DOUBLE, rank, VES_MATDATA_TAG, ves_comm);
     cc = MPI_Send(A.indice, A.ndim, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
     cc = MPI_Send(A.pointers, A.nrow+1, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
-    cc = MPI_Send(A.rorder, A.neq, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
+    //cc = MPI_Send(A.rorder, A.neq, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
+    cc = MPI_Send(A.order, A.nrow, MPI_INTEGER, rank, VES_MATDATA_TAG, ves_comm);
 
     // Send Matrix b
     cc = MPI_Send(b.value, A.nrow, MPI_DOUBLE, rank, VES_MATDATA_TAG, ves_comm);
@@ -427,15 +428,19 @@ int VESolverAPI::solve_symmetric(int solver, SpDistMatrix& A, DistVector& b, Vec
  * Solver Interface for MPI-Parallelized client
  */
 int VESolverAPI::solve(int solver, SpDistMatrix& A, DistVector& b, Vector& x, double res, int mode) {
-    int cc = -1; 
+    int cc = -1;
+    TIMELOG(tl);
 
     if (cl_comm == MPI_COMM_NULL) {
         return -1;
     }
 
+    TIMELOG_START(tl);
     A.reordering();
+    TIMELOG_END(tl, "reordering");
 
     /* Call solver */
+    TIMELOG_START(tl);
     switch(mode) {
         case VES_MODE_GATHER_ON_VH:
             cc = solve_gather_on_vh(solver, A, b, x, res);
@@ -449,6 +454,7 @@ int VESolverAPI::solve(int solver, SpDistMatrix& A, DistVector& b, Vector& x, do
             cc = solve_symmetric(solver, A, b, x, res);
             break;
     }
+    TIMELOG_END(tl, "paralleSolver");
 
     return cc;
 }
