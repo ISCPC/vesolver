@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+    	
+    <storageModule moduleId="org.eclipse.cdt.core.settings">
+        		
+        <cconfiguration id="intel.config.oneapi.icx.so.debug.1592399107">
+            			
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="intel.config.oneapi.icx.so.debug.1592399107" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+                				
+                <externalSettings>
+                    					
+                    <externalSetting>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/LinearSolverCollection"/>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/LinearSolver"/>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/LinearSolverCollection/Debug"/>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/LinearSolver/Debug"/>
+                        						
+                        <entry flags="RESOLVED" kind="libraryFile" name="LinearSolver" srcPrefixMapping="" srcRootPath=""/>
+                        					
+                    </externalSetting>
+                    				
+                </externalSettings>
+                				
+                <extensions>
+                    					
+                    <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    				
+                </extensions>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="cdtBuildSystem" version="4.0.0">
+                				
+                <configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" description="" id="intel.config.oneapi.icx.so.debug.1592399107" name="Debug" parent="intel.config.oneapi.icx.so.debug">
+                    					
+                    <folderInfo id="intel.config.oneapi.icx.so.debug.1592399107." name="/" resourcePath="">
+                        						
+                        <toolChain id="intel.toolchain.oneapi.icx.so.debug.489724134" name="Intel C++ Compiler" nonInternalBuilderId="org.eclipse.ptp.rdt.sync.cdt.core.SyncBuilder" superClass="intel.toolchain.oneapi.icx.so.debug">
+                            							
+                            <targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.oneapi.icx.base.1519342559" isAbstract="false" name="intel.platform.icx.base" osList="linux" superClass="intel.platform.oneapi.icx.base"/>
+                            							
+                            <builder buildPath="${workspace_loc:/LinearSolver}/Debug" id="org.eclipse.ptp.rdt.sync.cdt.core.SyncBuilder.340941426" keepEnvironmentInBuildfile="false" name="Sync Builder" superClass="org.eclipse.ptp.rdt.sync.cdt.core.SyncBuilder"/>
+                            							
+                            <tool id="intel.tool.archiver.oneapi.icx.base.660243739" name="Intel Archiver" superClass="intel.tool.archiver.oneapi.icx.base"/>
+                            							
+                            <tool id="intel.tool.cpp.compiler.oneapi.icx.base.1477661951" name="Intel C++ Compiler" superClass="intel.tool.cpp.compiler.oneapi.icx.base">
+                                								
+                                <option defaultValue="true" id="intel.compilestep.general.debug.2118097039" name="Include Debug Information (-g)" superClass="intel.compilestep.general.debug" useByScannerDiscovery="false" valueType="boolean"/>
+                                								
+                                <option defaultValue="general.opt.none" id="intel.compilestep.general.optimization2.637300676" name="Optimization Level" superClass="intel.compilestep.general.optimization2" useByScannerDiscovery="false" valueType="enumerated"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.c.compiler.oneapi.icx.base.2121266623" name="Intel C Compiler" superClass="intel.tool.c.compiler.oneapi.icx.base">
+                                								
+                                <option defaultValue="true" id="intel.compilestep.general.debug.1625388778" name="Include Debug Information (-g)" superClass="intel.compilestep.general.debug" useByScannerDiscovery="false" valueType="boolean"/>
+                                								
+                                <option defaultValue="general.opt.none" id="intel.compilestep.general.optimization2.2018732104" name="Optimization Level" superClass="intel.compilestep.general.optimization2" useByScannerDiscovery="false" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="intel.compilestep.preprocessor.includedirectories.1929140068" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="src/common"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="intel.compilestep.preprocessor.defsym.1777748080" name="Preprocessor Definitions (-D)" superClass="intel.compilestep.preprocessor.defsym" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="MKL"/>
+                                    								
+                                </option>
+                                								
+                                <option id="intel.compilestep.cg.fpic.1703216706" name="Generate Position Independent Code (-fpic)" superClass="intel.compilestep.cg.fpic" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                                								
+                                <option id="intel.compilestep.cg.reqintelextensions.19.1654489377" name="Intel(R) Processor-Specific Optimization" superClass="intel.compilestep.cg.reqintelextensions.19" useByScannerDiscovery="false" value="intel.cg.reqavx2" valueType="enumerated"/>
+                                								
+                                <inputType id="intel.c.compilestep.input.1305800871" name="C Sources" superClass="intel.c.compilestep.input"/>
+                                								
+                                <inputType id="intel.c.compilestep.asm.primary.792239728" superClass="intel.c.compilestep.asm.primary"/>
+                                								
+                                <inputType id="intel.c.compilestep.asm.646724276" superClass="intel.c.compilestep.asm"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.cpp.linker.oneapi.icx.base.922796210" name="Intel C++ Linker" superClass="intel.tool.cpp.linker.oneapi.icx.base">
+                                								
+                                <option defaultValue="true" id="intel.linkstep.shared.556482439" name="Shared (-shared)" superClass="intel.linkstep.shared" valueType="boolean"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.c.linker.oneapi.icx.base.1800580477" name="Intel C Linker" superClass="intel.tool.c.linker.oneapi.icx.base">
+                                								
+                                <option defaultValue="true" id="intel.linkstep.shared.1053217200" name="Shared (-shared)" superClass="intel.linkstep.shared" useByScannerDiscovery="false" valueType="boolean"/>
+                                								
+                                <option id="intel.linkstep.general.optimization2.1583684977" name="Optimization Level" superClass="intel.linkstep.general.optimization2" useByScannerDiscovery="false" value="general.opt.none" valueType="enumerated"/>
+                                								
+                                <inputType id="intel.linkstep.input.136744063" superClass="intel.linkstep.input">
+                                    									
+                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+                                    									
+                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
+                                    								
+                                </inputType>
+                                							
+                            </tool>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
+                    <folderInfo id="intel.config.oneapi.icx.so.debug.1592399107.1366193899" name="/" resourcePath="src">
+                        						
+                        <toolChain id="intel.toolchain.oneapi.icx.so.debug.190865335" name="Intel C++ Compiler" superClass="intel.toolchain.oneapi.icx.so.debug" unusedChildren="">
+                            							
+                            <targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.oneapi.icx.base" isAbstract="false" name="intel.platform.icx.base" osList="linux" superClass="intel.platform.oneapi.icx.base"/>
+                            							
+                            <tool id="intel.tool.archiver.oneapi.icx.base.873626410" name="Intel Archiver" superClass="intel.tool.archiver.oneapi.icx.base.660243739"/>
+                            							
+                            <tool id="intel.tool.cpp.compiler.oneapi.icx.base.1830568671" name="Intel C++ Compiler" superClass="intel.tool.cpp.compiler.oneapi.icx.base.1477661951"/>
+                            							
+                            <tool id="intel.tool.c.compiler.oneapi.icx.base.2037853302" name="Intel C Compiler" superClass="intel.tool.c.compiler.oneapi.icx.base.2121266623">
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="intel.compilestep.preprocessor.includedirectories.1305255525" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="../src/common"/>
+                                    								
+                                </option>
+                                								
+                                <inputType id="intel.c.compilestep.input.533428425" name="C Sources" superClass="intel.c.compilestep.input"/>
+                                								
+                                <inputType id="intel.c.compilestep.asm.primary.551739562" superClass="intel.c.compilestep.asm.primary"/>
+                                								
+                                <inputType id="intel.c.compilestep.asm.1854553255" superClass="intel.c.compilestep.asm"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.cpp.linker.oneapi.icx.base.1668279669" name="Intel C++ Linker" superClass="intel.tool.cpp.linker.oneapi.icx.base.922796210"/>
+                            							
+                            <tool id="intel.tool.c.linker.oneapi.icx.base.306245746" name="Intel C Linker" superClass="intel.tool.c.linker.oneapi.icx.base.1800580477"/>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
+                    <sourceEntries>
+                        						
+                        <entry excluding="common|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+                        						
+                        <entry excluding="solvers/hs.c|solvers/pcg.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        					
+                    </sourceEntries>
+                    				
+                </configuration>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+            			
+            <storageModule buildDir="build/${ConfigName}" moduleId="de.marw.cdt.cmake.core.settings">
+                				
+                <options/>
+                				
+                <defs/>
+                				
+                <undefs/>
+                			
+            </storageModule>
+            		
+        </cconfiguration>
+        		
+        <cconfiguration id="intel.config.oneapi.icx.so.release.326755873">
+            			
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="intel.config.oneapi.icx.so.release.326755873" moduleId="org.eclipse.cdt.core.settings" name="Release">
+                				
+                <externalSettings>
+                    					
+                    <externalSetting>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/LinearSolverCollection"/>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/LinearSolver"/>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/LinearSolverCollection/Release"/>
+                        						
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/LinearSolver/Release"/>
+                        						
+                        <entry flags="RESOLVED" kind="libraryFile" name="LinearSolver" srcPrefixMapping="" srcRootPath=""/>
+                        					
+                    </externalSetting>
+                    				
+                </externalSettings>
+                				
+                <extensions>
+                    					
+                    <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    				
+                </extensions>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="cdtBuildSystem" version="4.0.0">
+                				
+                <configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" description="" id="intel.config.oneapi.icx.so.release.326755873" name="Release" parent="intel.config.oneapi.icx.so.release">
+                    					
+                    <folderInfo id="intel.config.oneapi.icx.so.release.326755873." name="/" resourcePath="">
+                        						
+                        <toolChain id="intel.toolchain.oneapi.icx.so.release.150123921" name="Intel C++ Compiler" nonInternalBuilderId="org.eclipse.ptp.rdt.sync.cdt.core.SyncBuilder" superClass="intel.toolchain.oneapi.icx.so.release">
+                            							
+                            <targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.oneapi.icx.base.373071507" isAbstract="false" name="intel.platform.icx.base" osList="linux" superClass="intel.platform.oneapi.icx.base"/>
+                            							
+                            <builder buildPath="${workspace_loc:/LinearSolver}/Release" id="org.eclipse.ptp.rdt.sync.cdt.core.SyncBuilder.507903232" keepEnvironmentInBuildfile="false" name="Sync Builder" superClass="org.eclipse.ptp.rdt.sync.cdt.core.SyncBuilder"/>
+                            							
+                            <tool id="intel.tool.archiver.oneapi.icx.base.1393557153" name="Intel Archiver" superClass="intel.tool.archiver.oneapi.icx.base"/>
+                            							
+                            <tool id="intel.tool.cpp.compiler.oneapi.icx.base.1459668412" name="Intel C++ Compiler" superClass="intel.tool.cpp.compiler.oneapi.icx.base">
+                                								
+                                <option defaultValue="false" id="intel.compilestep.general.debug.1075278198" name="Include Debug Information (-g)" superClass="intel.compilestep.general.debug" useByScannerDiscovery="false" valueType="boolean"/>
+                                								
+                                <option defaultValue="general.opt.speed" id="intel.compilestep.general.optimization2.1711724371" name="Optimization Level" superClass="intel.compilestep.general.optimization2" useByScannerDiscovery="false" valueType="enumerated"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.c.compiler.oneapi.icx.base.453191430" name="Intel C Compiler" superClass="intel.tool.c.compiler.oneapi.icx.base">
+                                								
+                                <option defaultValue="false" id="intel.compilestep.general.debug.957297163" name="Include Debug Information (-g)" superClass="intel.compilestep.general.debug" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                                								
+                                <option defaultValue="general.opt.speed" id="intel.compilestep.general.optimization2.1102486577" name="Optimization Level" superClass="intel.compilestep.general.optimization2" useByScannerDiscovery="false" value="general.opt.speedHLO" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="intel.compilestep.preprocessor.defsym.766204878" name="Preprocessor Definitions (-D)" superClass="intel.compilestep.preprocessor.defsym" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="MKL"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="_TIMELOG"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="intel.compilestep.preprocessor.includedirectories.716336700" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/common}&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="intel.compilestep.cg.fpic.2021562867" name="Generate Position Independent Code (-fpic)" superClass="intel.compilestep.cg.fpic" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                                								
+                                <option id="intel.compilestep.cg.reqintelextensions.19.1657436536" name="Intel(R) Processor-Specific Optimization" superClass="intel.compilestep.cg.reqintelextensions.19" useByScannerDiscovery="false" value="intel.cg.reqavx2" valueType="enumerated"/>
+                                								
+                                <option id="intel.compilestep.oneapi.qperflibs.qmkl.2121257915" name="Use Intel(R) oneAPI Math Kernel Library" superClass="intel.compilestep.oneapi.qperflibs.qmkl" useByScannerDiscovery="true" value="perflibs.mkl.none" valueType="enumerated"/>
+                                								
+                                <inputType id="intel.c.compilestep.input.2114451730" name="C Sources" superClass="intel.c.compilestep.input"/>
+                                								
+                                <inputType id="intel.c.compilestep.asm.primary.1860182175" superClass="intel.c.compilestep.asm.primary"/>
+                                								
+                                <inputType id="intel.c.compilestep.asm.1351502415" superClass="intel.c.compilestep.asm"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.cpp.linker.oneapi.icx.base.1055166920" name="Intel C++ Linker" superClass="intel.tool.cpp.linker.oneapi.icx.base">
+                                								
+                                <option defaultValue="true" id="intel.linkstep.shared.815246686" name="Shared (-shared)" superClass="intel.linkstep.shared" valueType="boolean"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.c.linker.oneapi.icx.base.2058144842" name="Intel C Linker" superClass="intel.tool.c.linker.oneapi.icx.base">
+                                								
+                                <option defaultValue="true" id="intel.linkstep.shared.1257179022" name="Shared (-shared)" superClass="intel.linkstep.shared" useByScannerDiscovery="false" valueType="boolean"/>
+                                								
+                                <option id="intel.linkstep.general.optimization2.2018219581" name="Optimization Level" superClass="intel.linkstep.general.optimization2" useByScannerDiscovery="false" value="general.opt.speedHLO" valueType="enumerated"/>
+                                								
+                                <option id="intel.linkstep.oneapi.qperflibs.qmkl.1748387357" name="Use Intel(R) oneAPI Math Kernel Library" superClass="intel.linkstep.oneapi.qperflibs.qmkl" useByScannerDiscovery="false" value="perflibs.mkl.none" valueType="enumerated"/>
+                                								
+                                <inputType id="intel.linkstep.input.1593142397" superClass="intel.linkstep.input">
+                                    									
+                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+                                    									
+                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
+                                    								
+                                </inputType>
+                                							
+                            </tool>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
+                    <folderInfo id="intel.config.oneapi.icx.so.release.326755873.2031182907" name="/" resourcePath="src">
+                        						
+                        <toolChain id="intel.toolchain.oneapi.icx.so.release.1548396173" name="Intel C++ Compiler" superClass="intel.toolchain.oneapi.icx.so.release" unusedChildren="">
+                            							
+                            <targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.oneapi.icx.base" isAbstract="false" name="intel.platform.icx.base" osList="linux" superClass="intel.platform.oneapi.icx.base"/>
+                            							
+                            <tool id="intel.tool.archiver.oneapi.icx.base.1892557516" name="Intel Archiver" superClass="intel.tool.archiver.oneapi.icx.base.1393557153"/>
+                            							
+                            <tool id="intel.tool.cpp.compiler.oneapi.icx.base.1056761303" name="Intel C++ Compiler" superClass="intel.tool.cpp.compiler.oneapi.icx.base.1459668412"/>
+                            							
+                            <tool id="intel.tool.c.compiler.oneapi.icx.base.654951922" name="Intel C Compiler" superClass="intel.tool.c.compiler.oneapi.icx.base.453191430">
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="intel.compilestep.preprocessor.includedirectories.1020176236" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="../src/common"/>
+                                    								
+                                </option>
+                                								
+                                <inputType id="intel.c.compilestep.input.1109411701" name="C Sources" superClass="intel.c.compilestep.input"/>
+                                								
+                                <inputType id="intel.c.compilestep.asm.primary.456745696" superClass="intel.c.compilestep.asm.primary"/>
+                                								
+                                <inputType id="intel.c.compilestep.asm.2050739768" superClass="intel.c.compilestep.asm"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.cpp.linker.oneapi.icx.base.215211645" name="Intel C++ Linker" superClass="intel.tool.cpp.linker.oneapi.icx.base.1055166920">
+                                								
+                                <option id="intel.linkstep.general.optimization2.582885081" name="Optimization Level" superClass="intel.linkstep.general.optimization2" value="general.opt.speedHLO" valueType="enumerated"/>
+                                								
+                                <option id="intel.linkstep.oneapi.qperflibs.qmkl.651068920" name="Use Intel(R) oneAPI Math Kernel Library" superClass="intel.linkstep.oneapi.qperflibs.qmkl" value="perflibs.mkl.none" valueType="enumerated"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="intel.tool.c.linker.oneapi.icx.base.813439922" name="Intel C Linker" superClass="intel.tool.c.linker.oneapi.icx.base.2058144842"/>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
+                    <sourceEntries>
+                        						
+                        <entry excluding="common|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+                        						
+                        <entry excluding="solvers/hs.c|solvers/pcg.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        					
+                    </sourceEntries>
+                    				
+                </configuration>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+            		
+        </cconfiguration>
+        	
+    </storageModule>
+    	
+    <storageModule moduleId="cdtBuildSystem" version="4.0.0">
+        		
+        <project id="LinearSolverCollection.intel.target.oneapi.icx.so.817698762" name="Shared Library" projectType="intel.target.oneapi.icx.so"/>
+        	
+    </storageModule>
+    	
+    <storageModule moduleId="scannerConfiguration">
+        		
+        <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+        	
+    </storageModule>
+    	
+    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+    	
+    <storageModule moduleId="refreshScope" versionNumber="2">
+        		
+        <configuration configurationName="Remote">
+            			
+            <resource resourceType="PROJECT" workspacePath="/LinearSolver"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="Debug">
+            			
+            <resource resourceType="PROJECT" workspacePath="/LinearSolverCollection"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="Release">
+            			
+            <resource resourceType="PROJECT" workspacePath="/LinearSolverCollection"/>
+            		
+        </configuration>
+        	
+    </storageModule>
+    	
+    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+    	
+    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+    
+</cproject>
