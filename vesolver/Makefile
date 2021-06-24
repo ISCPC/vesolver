@@ -1,12 +1,7 @@
 #
 # Makefile for solverBench
 #
-WITH_AURORA=true
-
-#
-# Enable/Disable ElmerFEM solver support
-#
-WITH_ELMERSOLVER=false
+WITH_AURORA=false
 
 #
 # Enable/Disable PARDISO
@@ -101,39 +96,6 @@ else
 LDFLAGS += -lopenblas
 endif # WITH_MKL
 endif # WITH_AURORA
-
-###################
-# for ElmerSolver
-###################
-ifeq ($(WITH_ELMERSOLVER),true)
-CSRCS += elmerSolver.c
-
-CFLAGS += -DELMERSOLVER
-CXXFLAGS += -DELMERSOLVER
-
-FSRCS += elmerSolverAPI.f90
-LIBS += libelmerapi.so
-
-ELMER_LIB_PATH = ../dist/ve/lib/elmersolver
-ELMER_MOD_PATH = ../elmer/build/fmodules
-
-LDFLAGS += -L$(ELMER_LIB_PATH) -lelmersolver
-LDFLAGS += -lfhuti -lmatc -larpack
-
-ifeq ($(WITH_AURORA),true)
-FFLAGS += -module $(ELMER_MOD_PATH)
-ifeq ($(WITH_MPI),true)
-LDFLAGS += -lparpack -lnc++
-else
-#LDFLAGS += -lmpi_stubs
-endif
-LDFLAGS += -llapack -lblas_openmp
-#
-else # WITH_AURORA
-FFLAGS += -J $(ELMER_MOD_PATH)
-endif # WITH_AURORA
-
-endif # WITH_ELMERSOLVER
 
 ###################
 CMDS = vesolver

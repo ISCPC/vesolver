@@ -1,4 +1,0 @@
-[submodule "elmer/elmerfem"]
-	path = elmer/elmerfem
-	url = https://github.com/ISCPC/elmerfem.git
-	branch = SXAT-VE
