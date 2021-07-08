@@ -40,7 +40,7 @@ uint64_t vesolver_finalize() {
 
 uint64_t vesolver_create_handle_by_desc(uint64_t vedescp) {
     vesolver_desc_t* vedesc = (vesolver_desc_t*)vedescp;
-    vesolver_instance_t instance = &instances[vedesc->ves_handle];
+    vesolver_instance_t* instance = &instances[vedesc->ves_handle];
     int cc;
 
     SolverHandle_t hdl = solver_create_handle();
@@ -64,7 +64,7 @@ uint64_t vesolver_create_handle_by_desc(uint64_t vedescp) {
 
 uint64_t vesolver_free_handle(uint64_t vedescp) {
     vesolver_desc_t* vedesc = (vesolver_desc_t*)vedescp;
-    vesolver_instance_t instance = &instances[vedesc->ves_handle];
+    vesolver_instance_t* instance = &instances[vedesc->ves_handle];
 
     int cc = solver_free_handle(instance->hdl);
     return (cc<0) ? VESOLVER_ERROR : VESOLVER_SUCCESS;
@@ -72,7 +72,7 @@ uint64_t vesolver_free_handle(uint64_t vedescp) {
 
 uint64_t vesolver_solve(uint64_t vedescp) {
     vesolver_desc_t* vedesc = (vesolver_desc_t*)vedescp;
-    vesolver_instance_t instance = &instances[vedesc->ves_handle];
+    vesolver_instance_t* instance = &instances[vedesc->ves_handle];
 
     int cc = solver_solve(instance->hdl, (double*)(vedesc->bptr), (double*)(vedesc->xptr),
             vedesc->options.res);

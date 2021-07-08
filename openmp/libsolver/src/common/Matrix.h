@@ -52,7 +52,7 @@ typedef struct Matrix {
     int* indice;
     double* values;
     void* info;
-#ifdef MKL_SBLAS
+#ifdef MKL
     sparse_matrix_t hdl;
 #endif
 #ifdef SXAT
