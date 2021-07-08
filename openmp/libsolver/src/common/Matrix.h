@@ -5,7 +5,9 @@
 
 #ifdef MKL
 #include <mkl.h>
+#ifdef MKL_SBLAS
 #include <mkl_spblas.h>
+#endif /* MKL_SBLAS */
 #else
 #include <cblas.h>
 #endif /* MKL */
@@ -25,11 +27,18 @@
 #define MATRIX_TYPE_UPPER      (0)
 #define MATRIX_TYPE_UNIT       (1<<6)
 #define MATRIX_TYPE_NON_UNIT   (0)
+#define MATRIX_TYPE_CSC        (0<<8)
+#define MATRIX_TYPE_CSR        (1<<8)
+#define MATRIX_TYPE_DCSC       (2<<8)
+#define MATRIX_TYPE_DCSR       (3<<8)
+#define MATRIX_TYPE_MASK       (0xf<<8)
 
 #define MATRIX_INDEX_TYPE(A)    (((A)->flags)&0xf)
 #define MATRIX_IS_SYMMETRIC(A)  (((A)->flags)&MATRIX_TYPE_SYMMETRIC)
 #define MATRIX_IS_LOWER(A)      (((A)->flags)&MATRIX_TYPE_LOWER)
 #define MATRIX_IS_UNIT(A)       (((A)->flags)&MATRIX_TYPE_UNIT)
+#define MATRIX_IS_CSC(A)        ((((A)->flags)&MATRIX_TYPE_MASK) == MATRIX_TYPE_CSC)
+#define MATRIX_IS_CSR(A)        ((((A)->flags)&MATRIX_TYPE_MASK) == MATRIX_TYPE_CSR)
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +52,7 @@ typedef struct Matrix {
     int* indice;
     double* values;
     void* info;
-#ifdef MKL
+#ifdef MKL_SBLAS
     sparse_matrix_t hdl;
 #endif
 #ifdef SXAT

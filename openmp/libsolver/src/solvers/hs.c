@@ -25,7 +25,10 @@ typedef struct hs_info {
     HS_handle_t hnd;
 } hs_info_t;
 
-Matrix_t* PreProcess(const Matrix_t* A0) {
+/*
+ * API
+ */
+static Matrix_t* solve_pre(const Matrix_t* A0) {
     int ierr;
     TIMELOG(tl);
 
@@ -35,8 +38,8 @@ Matrix_t* PreProcess(const Matrix_t* A0) {
     hs_info_t* info = (hs_info_t*)malloc(sizeof(hs_info_t));
 
     HS_int_t isym = MATRIX_IS_SYMMETRIC(A) ? HS_SYMMETRIC : HS_UNSYMMETRIC;
-    //HS_int_t iformat = SPMATRIX_IS_CSR(A) ? HS_CSR : HS_CSC;
-    HS_int_t iformat = HS_CSC;
+    HS_int_t iformat = MATRIX_IS_CSR(A) ? HS_CSR : HS_CSC;
+    //HS_int_t iformat = HS_CSC;
     
     ierr = HS_init_handle(&(info->hnd), A->NROWS, A->NROWS, isym, iformat);
     if (ierr != HS_RESULT_OK) {
@@ -61,7 +64,7 @@ Matrix_t* PreProcess(const Matrix_t* A0) {
     FTRACE_REGION_BEGIN("HS_preprocess");
     TIMELOG_START(tl);
     ierr = HS_preprocess_rd(info->hnd, A->pointers, A->indice, A->values);
-    TIMELOG_END(tl, "preprocess");
+    TIMELOG_END(tl, "hs_preprocess");
     FTRACE_REGION_END("HS_preprocess");
     if (ierr != HS_RESULT_OK) {
         fprintf(stderr, "ERROR: HS_preprocess_rd failed with %d.\n", ierr);
@@ -71,7 +74,7 @@ Matrix_t* PreProcess(const Matrix_t* A0) {
     FTRACE_REGION_BEGIN("HS_factorize");
     TIMELOG_START(tl);
     ierr = HS_factorize_rd(info->hnd, A->pointers, A->indice, A->values);
-    TIMELOG_END(tl, "factorize");
+    TIMELOG_END(tl, "hs_factorize");
     FTRACE_REGION_END("HS_factorize");
     if (ierr != HS_RESULT_OK) {
         fprintf(stderr, "ERROR: HS_factorize_rd failed with %d.\n", ierr);
@@ -82,13 +85,7 @@ Matrix_t* PreProcess(const Matrix_t* A0) {
     return A;
 }
 
-int PostProcess(Matrix_t* A) {
-    Matrix_free(A);
-    return 0;
-}
-
-//void aurora_hs_main(const SpMatrix_t* const A, double *b, double *x) {
-int LinearSolve(const Matrix_t *A, const double *b, double *x, const double tolerance) {
+static int solve(const Matrix_t *A, const double* b, double* x, const double tolerance) {
     int ierr;
     TIMELOG(tl);
 
@@ -102,7 +99,7 @@ int LinearSolve(const Matrix_t *A, const double *b, double *x, const double tole
     FTRACE_REGION_BEGIN("HS_solve");
     TIMELOG_START(tl);
     ierr = HS_solve_rd(info->hnd, A->pointers, A->indice, A->values, NRHS, (double*)b, x, &res);
-    TIMELOG_END(tl, "solve");
+    TIMELOG_END(tl, "hs_solve");
     FTRACE_REGION_END("HS_solve");
     if (ierr != HS_RESULT_OK) {
         fprintf(stderr, "ERROR: HS_solve_rd failed with %d.\n", ierr);
@@ -114,3 +111,29 @@ int LinearSolve(const Matrix_t *A, const double *b, double *x, const double tole
 
     return 0;
 }
+
+static int solve_post(Matrix_t* A) {
+    Matrix_free(A);
+
+    return 0;
+}
+
+static void solve_free(SolverPlugin_t* solver) {
+	return;
+}
+
+/*
+ * Solver Plugin Interface
+ */
+SolverPlugin_t* hs_init() {
+	SolverPlugin_t* solver = (SolverPlugin_t*)malloc(sizeof(SolverPlugin_t));
+
+	solver->set_option = NULL;
+	solver->solve_pre = solve_pre;
+	solver->solve = solve;
+	solver->solve_post = solve_post;
+	solver->free = solve_free;
+
+	return solver;
+}
+
