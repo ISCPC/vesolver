@@ -1,0 +1,14 @@
+#
+# Architechture dependent part : SX-Aurora TSUBASA
+#
+CC = ncc
+CXX = nc++
+FC = nfort
+
+CXXFLAGS += -O3 -DSXAT
+CFLAGS += -O3 -DSXAT
+FFLAGS += -O3
+
+LDFLAGS += -lcblas -lblas_openmp -lsblas_openmp
+
+include ../../Make.common

@@ -1,0 +1,13 @@
+#
+# Architechture dependent part : FX1000
+#
+CC = fccpx
+CXX = FCCpx
+FC = frtpx
+
+CXXFLAGS += -O3 -std=c++11 -SSL2 -DWITH_SSL2
+CFLAGS += -O3 -std=c11 -SSL2 -DWITH_SSL2
+FFLAGS += -O3 -SSL2 -DWITH_SSL2
+LDFLAGS += -mlcmain=main -SSL2
+
+include ../../Make.common

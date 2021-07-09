@@ -1,0 +1,35 @@
+#
+# Architechture dependent part : Gcc + OpenBLAS
+#
+CC = gcc
+CXX = g++
+FC = gfortran
+
+#CXXFLAGS += -O3 -std=c++11 -march=native -mavx512f
+#CFLAGS += -O3 -std=c11 -march=native -mavx512f
+CXXFLAGS += -O3 -std=c++11 -march=native
+CFLAGS += -O3 -std=c11 -march=native
+FFLAGS += -O3
+
+ifeq ($(WITH_MKL),true)
+ifeq ($(WITH_ONEAPI),false)
+# without oneAPI
+INTEL_LIB = /opt/intel/lib/intel64
+MKL_LIB = /opt/intel/mkl/lib/intel64
+MKL_INCLUDE = /opt/intel/mkl/include
+
+CXXFLAGS += -I $(MKL_INCLUDE)
+CFLAGS += -I $(MKL_INCLUDE)
+FFLAGS += -I $(MKL_INCLUDE)
+
+LDFLAGS += -L$(INTEL_LIB) -L$(MKL_LIB)
+endif
+
+CXXFLAGS += -DMKL -DMKL_SBLAS
+CFLAGS += -DMKL -DMKL_SBLAS
+LDFLAGS += -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
+else
+LDFLAGS += -lopenblas
+endif
+
+include ../../Make.common

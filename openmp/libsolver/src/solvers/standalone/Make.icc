@@ -1,0 +1,44 @@
+#
+# Architechture dependent part : Intel Compiler + MKL
+#
+CC = icc
+CXX = icpc
+FC = ifort
+
+CXXFLAGS += -O3 -std=c++11 -DMKL
+#CFLAGS += -O3 -std=c11 -DMKL
+CFLAGS += -O3 -DMKL
+FFLAGS += -O3 -fpp
+#LDFLAGS += -nofor_main
+LDFLAGS += -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
+#LDFLAGS = -lmkl_avx512 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
+
+# without oneAPI
+ifeq ($(WITH_ONEAPI),false)
+INTEL_LIB = /opt/intel/lib/intel64
+MKL_LIB = /opt/intel/mkl/lib/intel64
+MKL_INCLUDE = /opt/intel/mkl/include
+
+CXXFLAGS += -I $(MKL_INCLUDE)
+CFLAGS += -I $(MKL_INCLUDE)
+FFLAGS += -I $(MKL_INCLUDE)
+
+LDFLAGS += -L$(INTEL_LIB) -L$(MKL_LIB)
+endif
+
+# optimize flags
+#CXXFLAGS += -mtune=skylake-avx512 -march=skylake-avx512
+#CFLAGS += -mtune=skylake-avx512 -march=skylake-avx512
+#CXXFLAGS += -xCORE-AVX512
+#CFLAGS += -xCORE-AVX512
+#CXXFLAGS += -xCOMMON-AVX512
+#CFLAGS += -xCOMMON-AVX512
+#CXXFLAGS += -xCOMMON-AVX512 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout -restrict
+#CFLAGS += -xCOMMON-AVX512 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout -restrict
+
+ifeq ($(WITH_MKL_SBLAS),true)
+CXXFLAGS += -DMKL_SBLAS
+CFLAGS += -DMKL_SBLAS
+endif # WITH_MKL_SBLAS
+
+include ../standalone/Make.common

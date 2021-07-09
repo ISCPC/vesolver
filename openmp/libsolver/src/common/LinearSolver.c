@@ -24,6 +24,12 @@ static SolverPlugin_t* solver;
  */
 SolverPlugin_t* bicgstab2_init();
 SolverPlugin_t* cg_init();
+#ifdef SXAT
+SolverPlugin_t* hs_init();
+#endif
+#ifdef MKL
+SolverPlugin_t* pardiso_init();
+#endif
 
 static SolverPlugin_t* get_solver(int solverId) {
 	switch(solverId) {
@@ -33,10 +39,12 @@ static SolverPlugin_t* get_solver(int solverId) {
 	case SOLVER_ITER_BICGSTAB2:
 		return bicgstab2_init();
 
-#if 0
+#ifdef SXAT
 	case SOLVER_DIRECT_HS:
 		return hs_init();
+#endif
 
+#ifdef MKL
 	case SOLVER_DIRECT_PARDISO:
 		return pardiso_init();
 #endif
