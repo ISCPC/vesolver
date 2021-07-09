@@ -80,7 +80,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="common|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry excluding="solvers/heterosolver/hs.c|solvers/calculix/pcg.c|solvers/standalone/SpMatrix.cpp|solvers/standalone/main.cpp|solvers/standalone/LinearSolverC.cpp|solvers/hs.c|solvers/pcg.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="solvers/ssl2/ssl2.c|solvers/heterosolver/hs.c|solvers/calculix/pcg.c|solvers/standalone/SpMatrix.cpp|solvers/standalone/main.cpp|solvers/standalone/LinearSolverC.cpp|solvers/hs.c|solvers/pcg.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -177,7 +177,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="common|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry excluding="solvers/heterosolver/hs.c|solvers/calculix/pcg.c|solvers/standalone/SpMatrix.cpp|solvers/standalone/main.cpp|solvers/standalone/LinearSolverC.cpp|solvers/hs.c|solvers/pcg.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="solvers/ssl2/ssl2.c|solvers/heterosolver/hs.c|solvers/calculix/pcg.c|solvers/standalone/SpMatrix.cpp|solvers/standalone/main.cpp|solvers/standalone/LinearSolverC.cpp|solvers/hs.c|solvers/pcg.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

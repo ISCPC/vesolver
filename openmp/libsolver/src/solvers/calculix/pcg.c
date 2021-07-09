@@ -23,6 +23,7 @@
 #include <strings.h>
 #include <stdint.h>
 #include "Matrix.h"
+#include "PluginAPI.h"
 
 /*
  * CG Solver
@@ -53,7 +54,7 @@
 /*--The function corresponds to function PARTCH() in H.R. Schwarz: FORTRAN-Pro-  --	*/
 /*--gramme zur Methode der finiten Elemente, p.117, Teubner, 1981                --	*/
 /*---------------------------------------------------------------------------------	*/
-ITG PreConditioning (const Matrix_t *A, const double alpha, Matrix_t *C) {
+static ITG PreConditioning (const Matrix_t *A, const double alpha, Matrix_t *C) {
     double          factor = 1.0/(1.0+alpha);
     ITG neq = A->NROWS;
     ITG *iz = A->pointers;
@@ -168,7 +169,7 @@ ITG PreConditioning (const Matrix_t *A, const double alpha, Matrix_t *C) {
 /*--gramme zur Methode der finiten Elemente, p.118, Teubner, 1981                --	*/
 /*---------------------------------------------------------------------------------	*/
 //void Mrhor (const double *C, const ITG neq, const ITG *aind, const ITG *aptr, const double *r, double *rho) {
-void Mrhor (const Matrix_t *C, const double *r, double *rho) {
+static void Mrhor (const Matrix_t *C, const double *r, double *rho) {
     ITG neq = C->NROWS;
     ITG *iz = C->pointers;
     ITG *ia = C->indice;
@@ -199,7 +200,7 @@ void Mrhor (const Matrix_t *C, const double *r, double *rho) {
 //void PCG (double *A, double *x, double *b, ITG neq, ITG len, ITG *ia, 
 //	  ITG *iz,double *eps, ITG *niter, ITG precFlg,
 //	  double *rho, double *r, double *g, double *C, double *z) {
-static void PCG (Matrix_t *A, double *b, double *x, double *eps, ITG *niter) {
+static void PCG (const Matrix_t *A, double *b, double *x, double *eps, ITG *niter) {
     ITG     i=0, k=0, iam;
     double  alpha=0.0, ekm1=0.0, rrho=0.0;
     double  rrho1=0.0, gz=0.0, qk=0.0;
@@ -321,7 +322,7 @@ static void PCG (Matrix_t *A, double *b, double *x, double *eps, ITG *niter) {
 /*
  * API
  */
-Matrix_t* PreProcess(const Matrix_t* A0) {
+static Matrix_t* solve_pre(const Matrix_t* A0) {
     Matrix_t* A = Matrix_duplicate(A0);
     double* factor = (double*)calloc(sizeof(double), A->NROWS);
     if (factor == NULL) {
@@ -347,7 +348,7 @@ Matrix_t* PreProcess(const Matrix_t* A0) {
     return A;
 }
 
-int LinearSolve(Matrix_t *A, double* b, double* x, double res) {
+static int solve(const Matrix_t *A, const double* b, double* x, const double res) {
     ITG neq = A->NROWS;
     double eps = res;
 
@@ -377,8 +378,31 @@ int LinearSolve(Matrix_t *A, double* b, double* x, double res) {
     return 0;
 }
 
-int PostProcess(Matrix_t* A) {
+static int solve_post(Matrix_t* A) {
     Matrix_free(A);
 
     return 0;
+}
+
+static void solve_free(SolverPlugin_t* solver) {
+	return;
+}
+
+/*
+ * Solver Plugin Interface
+ */
+#ifdef _STANDALONE
+SolverPlugin_t* solver_init() {
+#else
+SolverPlugin_t* pcg_init() {
+#endif
+	SolverPlugin_t* solver = (SolverPlugin_t*)malloc(sizeof(SolverPlugin_t));
+
+	solver->set_option = NULL;
+	solver->solve_pre = solve_pre;
+	solver->solve = solve;
+	solver->solve_post = solve_post;
+	solver->free = solve_free;
+
+	return solver;
 }

@@ -200,7 +200,11 @@ static void solve_free(SolverPlugin_t* solver) {
 /*
  * Solver Plugin Interface
  */
+#ifdef _STANDALONE
+SolverPlugin_t* solver_init() {
+#else
 SolverPlugin_t* cg_init() {
+#endif
 	SolverPlugin_t* solver = (SolverPlugin_t*)malloc(sizeof(SolverPlugin_t));
 
 	solver->set_option = NULL;
