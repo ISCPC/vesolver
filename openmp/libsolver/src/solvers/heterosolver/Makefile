@@ -15,7 +15,7 @@ include ../standalone/Make.SXAT
 #######
 SOLVERDIR = .
 
-CMDS = hs_c
+CMDS = hs
 SOLVER_SRC = hs.c
 SOLVER_OBJ = hs.o
 
@@ -24,7 +24,7 @@ all: $(CMDS)
 $(SOLVER_OBJ): $(SOLVER_SRC)
 	$(CC) $(CFLAGS) -c $^
 
-hs_c: $(COMMON_OBJS) hs.o
+hs: $(COMMON_OBJS) hs.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:

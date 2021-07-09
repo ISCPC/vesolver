@@ -11,4 +11,4 @@ FFLAGS += -O3
 
 LDFLAGS += -lcblas -lblas_openmp -lsblas_openmp
 
-include ../../Make.common
+include ../standalone/Make.common
