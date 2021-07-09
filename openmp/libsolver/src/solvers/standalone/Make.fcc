@@ -10,4 +10,4 @@ CFLAGS += -O3 -std=c11 -SSL2 -DWITH_SSL2
 FFLAGS += -O3 -SSL2 -DWITH_SSL2
 LDFLAGS += -mlcmain=main -SSL2
 
-include ../../Make.common
+include ../standalone/Make.common
