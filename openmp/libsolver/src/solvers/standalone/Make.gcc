@@ -32,4 +32,4 @@ else
 LDFLAGS += -lopenblas
 endif
 
-include ../../Make.common
+include ../standalone/Make.common
