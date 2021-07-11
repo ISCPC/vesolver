@@ -1,3 +1,5 @@
+build/*.o
+build/*.so
 /Debug_with_Intel C++ Compiler/
 /Debug_with_Linux GCC/
 /Release_with_Intel C++ Compiler/

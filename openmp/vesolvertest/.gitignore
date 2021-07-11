@@ -1,2 +1,4 @@
+src/vesolvertest
+src/*.o
 /Debug/
 /Release/

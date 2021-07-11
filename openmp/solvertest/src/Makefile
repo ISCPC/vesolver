@@ -1,10 +1,16 @@
+
+DISTSDIR=../../dists
+
+INCLUDEDIR=$(DISTSDIR)/ve/include
+LIBDIR=$(DISTSDIR)/ve/lib
+
 CC = ncc
-CFLAGS = -O3 -fopenmp -I. -I../../../include -D_TIMELOG
+CFLAGS = -O3 -fopenmp -I. -I$(INCLUDEDIR) -D_TIMELOG
 
 CXX = nc++
-CXXFLAGS = -O3 -fopenmp -I. -I../../../include -D_TIMELOG
+CXXFLAGS = -O3 -fopenmp -I. -I$(INCLUDEDIR) -D_TIMELOG
 
-LDFLAGS = -fopenmp -L../../../velib -lsolver -lcblas -lblas_openmp -lsblas_openmp
+LDFLAGS = -fopenmp -L$(LIBDIR) -lsolver -lcblas -lblas_openmp -lsblas_openmp
 LDFLAGS += -lheterosolver_openmp -lblas_sequential
 
 CSRCS = 

@@ -94,9 +94,10 @@ int main(int argc, char** argv) {
     }
 
     SolverHandle_t handle = solver_create_handle();
-    // cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_ITER_BICGSTAB2);
-    // cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_ITER_CG);
-    cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_DIRECT_PARDISO);
+    //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_ITER_BICGSTAB2);
+    //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_ITER_CG);
+    cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_DIRECT_HS);
+    //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_DIRECT_PARDISO);
     if (cc != 0) {
         printf("ERROR: set_option(SOLVER_OPTION_SOLVER) failed with %d\n", cc);
         exit(1);

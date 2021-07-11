@@ -1,3 +1,5 @@
+src/solvertest
+src/*.o
 /.ptp-sync/
 /Debug/
 /Release/

@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
     //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_BICGSTAB2);
 
     TIMELOG_START(tl);
-    matrix_desc_t* desc = vesolver_alloc_matrix(hdl, A.nrow, A.ndim, flag);
+    matrix_desc_t* desc = vesolver_alloc_matrix(hdl, A.nrow, A.ndim, flags);
     set_matrix(desc, A.pointers, A.indice, A.value);
     cc = vesolver_set_matrix(hdl, desc);
     TIMELOG_END(tl, "setMatrix");

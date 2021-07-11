@@ -1,6 +1,8 @@
+DISTSDIR=../../dists
+
 SRCDIR = ../src
-INCDIR=../../../include
-LIBDIR=../../../velib
+INCDIR=$(DISTSDIR)/ve/include
+LIBDIR=$(DISTSDIR)/ve/lib
 
 CC = ncc
 CFLAGS = -O3 -fpic -I$(SRCDIR) -I$(INCDIR) -DSXAT -D_TIMELOG
@@ -24,3 +26,6 @@ libvesolver.so: $(OBJS)
 
 clean:
 	rm $(OBJS2) libsolver.so
+
+install:
+	cp -i libvesolver.so $(LIBDIR)

@@ -1,12 +1,17 @@
+DISTSDIR = ../../dists
+
+INCLUDEDIR = $(DISTSDIR)/include
+LIBDIR = $(DISTSDIR)/lib
+
 CC = gcc
-CFLAGS = -O3 -g -fopenmp -I. -I../../../include -D_TIMELOG
+CFLAGS = -O3 -g -fopenmp -I. -I$(INCLUDEDIR) -D_TIMELOG
 
 CXX = g++
-CXXFLAGS = -O3 -g -fopenmp -I. -I../../../include -D_TIMELOG
+CXXFLAGS = -O3 -g -fopenmp -I. -I$(INCLUDEDIR) -D_TIMELOG
 
 LDFLAGS = -fopenmp
 LDFLAGS += -L/opt/nec/ve/veos/lib64 -Wl,-rpath=/opt/nec/ve/veos/lib64 -lveo
-LDFLAGS += -fopenmp -L../../../lib -lvesolver_api 
+LDFLAGS += -fopenmp -L$(LIBDIR) -lvesolver_api 
 
 CSRCS = 
 CXXSRCS = SpMatrix.cpp vestest.cpp
