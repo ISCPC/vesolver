@@ -78,7 +78,7 @@ matrix_desc_t* vesolver_alloc_matrix(vesolver_handle_t hdl, INT_T neq,
 	INT_T nnz, uint32_t flags);
 int vesolver_set_matrix(vesolver_handle_t hdl, matrix_desc_t *desc);
 #endif
-int vesolver_free_matrix(vesolver_handle_t hdl, matrix_desc_t* desc);
+int vesolver_free_matrix(vesolver_handle_t hdl);
 int vesolver_solve_sync(vesolver_handle_t hdl, double* b, double* x, double res);
 //int vesolver_solve_async();
 //int vesolver_solve_wait();

@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
     //printf("TRUERESIDUAL: %e\n", solver_calc_residual(handle, b.value, x.value, 0));
     //printf("TRUERESIDUAL(SCALED): %e\n", solver_calc_residual(handle, b.value, x.value, 1));
 
-    vesolver_free_matrix(hdl, desc);
+    vesolver_free_matrix(hdl);
 
     vesolver_deactivate(hdl);
     vesolver_finalize();

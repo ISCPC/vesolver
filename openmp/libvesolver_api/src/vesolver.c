@@ -380,9 +380,10 @@ int vesolver_set_matrix(vesolver_handle_t hdl, matrix_desc_t *desc) {
     return (retval == vedesc->dptr) ? 0 : 1;
 }
 
-int vesolver_free_matrix(vesolver_handle_t hdl, matrix_desc_t* desc) {
+int vesolver_free_matrix(vesolver_handle_t hdl) {
     vesolver_context_t* context = &contexts[hdl];
     vesolver_desc_t* vedesc = context->vedesc;
+    matrix_desc_t* desc = context->matdesc;
 
     veo_args *argp = veo_args_alloc();
     veo_args_set_u64(argp, 0, vedesc->dptr);
@@ -395,6 +396,14 @@ int vesolver_free_matrix(vesolver_handle_t hdl, matrix_desc_t* desc) {
     VEO_FREE_MEM(context, vedesc->values);
     VEO_FREE_MEM(context, vedesc->bptr);
     VEO_FREE_MEM(context, vedesc->xptr);
+    free(vedesc);
+    context->vedesc = NULL;
+
+    free(desc->pointers);
+    free(desc->indice);
+    free(desc->values);
+    free(desc);
+    context->matdesc = NULL;
     return 0;
 }
 
