@@ -57,12 +57,15 @@ static SolverPlugin_t* get_solver(int solverId) {
  * API Definition for libLinearSolver
  */
 int solver_init() {
+    solver = NULL;
 	return 0;
 };
 
 void solver_finalize() {
-	solver->free(solver);
-	free(solver);
+    if (solver != NULL) {
+	    solver->free(solver);
+        free(solver);
+    }
 	return;
 };
 

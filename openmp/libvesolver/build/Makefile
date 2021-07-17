@@ -28,4 +28,4 @@ clean:
 	rm $(OBJS2) libsolver.so
 
 install:
-	cp -i libvesolver.so $(LIBDIR)
+	cp -i libvesolver.so $(LIBDIR)/

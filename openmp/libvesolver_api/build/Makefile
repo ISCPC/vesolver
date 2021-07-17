@@ -26,5 +26,5 @@ clean:
 	-rm *.o $(LIB)
 
 install:
-	cp -i $(LIB) $(DISTSDIR)/lib
-	cp -i $(INCLUDEDIR)/vesolver.h $(DISTSDIR)/include
+	cp -i $(LIB) $(DISTSDIR)/lib/
+	cp -i $(INCLUDEDIR)/vesolver.h $(DISTSDIR)/include/

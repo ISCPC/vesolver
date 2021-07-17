@@ -31,5 +31,5 @@ clean:
 	rm $(OBJS2) libsolver.so
 
 install: libsolver.so
-	cp -i libsolver.so $(DESTDIR)
-	cp -i $(SRCDIR)/common/LinearSolver.h $(SRCDIR)/common/Matrix.h $(SRCDIR)/common/PluginAPI.h $(INCLUDEDIR)
+	cp -i libsolver.so $(DESTDIR)/
+	cp -i $(SRCDIR)/common/LinearSolver.h $(SRCDIR)/common/Matrix.h $(SRCDIR)/common/PluginAPI.h $(INCLUDEDIR)/
