@@ -79,7 +79,8 @@ int main(int argc, char** argv) {
     double res = 1.0e-4;
     //double res = 1.0e-1;
     int cc;
-    TIMELOG(tl);
+    TIMELOG(tl1);
+    TIMELOG(tl2);
 
     if (argc > 1) {
         snprintf(file_a, MAX_PATH_LEN, "%s/a" DATA_SUFFIX, argv[1]);
@@ -105,38 +106,43 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_CG);
+    //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_CG);
     //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_BICGSTAB2);
+    vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_DIRECT_HS);
 
-    TIMELOG_START(tl);
-    matrix_desc_t* desc = vesolver_alloc_matrix(hdl, A.nrow, A.ndim, flags);
-    set_matrix(desc, A.pointers, A.indice, A.value);
-    cc = vesolver_set_matrix(hdl, desc);
-    TIMELOG_END(tl, "setMatrix");
-    if (cc != 0) {
-        printf("ERROR: vesolver_set_matrix() failed with %d\n", cc);
-        exit(1);
+    for(int n=0; n<3; n++) {
+        TIMELOG_START(tl1);
+        TIMELOG_START(tl2);
+        matrix_desc_t* desc = vesolver_alloc_matrix(hdl, A.nrow, A.ndim, flags);
+        set_matrix(desc, A.pointers, A.indice, A.value);
+        cc = vesolver_set_matrix(hdl, desc);
+        TIMELOG_END(tl2, "VESOLVER: Set_matrix");
+        if (cc != 0) {
+            printf("ERROR: vesolver_set_matrix() failed with %d\n", cc);
+            exit(1);
+        }
+
+        TIMELOG_START(tl2);
+        cc = vesolver_solve_sync(hdl, b.value, x.value, res);
+        TIMELOG_END(tl2, "VESOLVER: Solve");
+        if (cc != 0) {
+            printf("ERROR: vesolver_solve_sync() failed with %d\n", cc);
+            exit(1);
+        }
+        TIMELOG_END(tl1, "VESOLVER: Overall");
+
+        /* Print the solution vector */
+        printf("%s\n", "******** Solution ********");
+        for (int i=0; i<5; i++) {
+            printf("x[%d] = %14.12f\n", i, x.value[i]);
+        }
+        printf("%s\n", "********** End ***********");
+
+        //printf("TRUERESIDUAL: %e\n", solver_calc_residual(handle, b.value, x.value, 0));
+        //printf("TRUERESIDUAL(SCALED): %e\n", solver_calc_residual(handle, b.value, x.value, 1));
+
+        vesolver_free_matrix(hdl);
     }
-
-    TIMELOG_START(tl);
-    cc = vesolver_solve_sync(hdl, b.value, x.value, res);
-    TIMELOG_END(tl, "solve");
-    if (cc != 0) {
-        printf("ERROR: vesolver_solve_sync() failed with %d\n", cc);
-        exit(1);
-    }
-
-    /* Print the solution vector */
-    printf("%s\n", "******** Solution ********");
-    for (int i=0; i<5; i++) {
-        printf("x[%d] = %14.12f\n", i, x.value[i]);
-    }
-    printf("%s\n", "********** End ***********");
-
-    //printf("TRUERESIDUAL: %e\n", solver_calc_residual(handle, b.value, x.value, 0));
-    //printf("TRUERESIDUAL(SCALED): %e\n", solver_calc_residual(handle, b.value, x.value, 1));
-
-    vesolver_free_matrix(hdl);
 
     vesolver_deactivate(hdl);
     vesolver_finalize();

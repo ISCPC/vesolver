@@ -67,6 +67,9 @@ void solver_finalize() {
 };
 
 SolverHandle_t solver_create_handle() {
+	A = (Matrix_t*)malloc(sizeof(Matrix_t));
+	Matrix_init(A);
+
 	return 0;
 }
 
@@ -96,9 +99,6 @@ int solver_set_matrix_csr(SolverHandle_t hdl,
 		const INT_T *indice, const double *value, const uint32_t flags) {
     TIMELOG(tl);
 
-	A = (Matrix_t*)malloc(sizeof(Matrix_t));
-	Matrix_init(A);
-
 	TIMELOG_START(tl);
     Matrix_setMatrixCSR(A, neq, nnz, pointers, indice, value, flags);
     TIMELOG_END(tl, "setMatrix");
@@ -108,7 +108,7 @@ int solver_set_matrix_csr(SolverHandle_t hdl,
 	D = solver->solve_pre(A);
     TIMELOG_END(tl, "preProcess");
 
-    return (D != NULL) ? Matrix_optimize(D) : -1;
+    return (D != NULL) ? 0 : -1;
 }
 
 int solver_solve(SolverHandle_t hdl, const double* b, double* x, const double res) {

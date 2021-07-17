@@ -93,43 +93,45 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    SolverHandle_t handle = solver_create_handle();
-    //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_ITER_BICGSTAB2);
-    //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_ITER_CG);
-    cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_DIRECT_HS);
-    //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_DIRECT_PARDISO);
-    if (cc != 0) {
-        printf("ERROR: set_option(SOLVER_OPTION_SOLVER) failed with %d\n", cc);
-        exit(1);
+    for (int n=0; n<3; n++) {
+        SolverHandle_t handle = solver_create_handle();
+        //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_ITER_BICGSTAB2);
+        //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_ITER_CG);
+        cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_DIRECT_HS);
+        //cc = solver_set_option(handle, SOLVER_OPTION_SOLVER, SOLVER_DIRECT_PARDISO);
+        if (cc != 0) {
+            printf("ERROR: set_option(SOLVER_OPTION_SOLVER) failed with %d\n", cc);
+            exit(1);
+        }
+
+        TIMELOG_START(tl);
+        cc = solver_set_matrix_csr(handle, A.nrow, A.ndim, A.pointers, A.indice, A.value, flags);
+        if (cc != 0) {
+            printf("ERROR: setMatrix failed with %d\n", cc);
+            exit(1);
+        }
+        TIMELOG_END(tl, "setMatrix");
+
+        TIMELOG_START(tl);
+        cc = solver_solve(handle, b.value, x.value, res);
+        if (cc != 0) {
+            printf("ERROR: solve failed with %d\n", cc);
+            exit(1);
+        }
+        TIMELOG_END(tl, "solve");
+
+        /* Print the solution vector */
+        printf("%s\n", "******** Solution ********");
+        for (int i=0; i<5; i++) {
+            printf("x[%d] = %14.12f\n", i, x.value[i]);
+        }
+        printf("%s\n", "********** End ***********");
+
+        printf("TRUERESIDUAL: %e\n", solver_calc_residual(handle, b.value, x.value, 0));
+        printf("TRUERESIDUAL(SCALED): %e\n", solver_calc_residual(handle, b.value, x.value, 1));
+
+        cc = solver_free_handle(handle);
     }
-
-    TIMELOG_START(tl);
-    cc = solver_set_matrix_csr(handle, A.nrow, A.ndim, A.pointers, A.indice, A.value, flags);
-    if (cc != 0) {
-        printf("ERROR: setMatrix failed with %d\n", cc);
-        exit(1);
-    }
-    TIMELOG_END(tl, "setMatrix");
-
-    TIMELOG_START(tl);
-    cc = solver_solve(handle, b.value, x.value, res);
-    if (cc != 0) {
-        printf("ERROR: solve failed with %d\n", cc);
-        exit(1);
-    }
-    TIMELOG_END(tl, "solve");
-
-    /* Print the solution vector */
-    printf("%s\n", "******** Solution ********");
-    for (int i=0; i<5; i++) {
-        printf("x[%d] = %14.12f\n", i, x.value[i]);
-    }
-    printf("%s\n", "********** End ***********");
-
-    printf("TRUERESIDUAL: %e\n", solver_calc_residual(handle, b.value, x.value, 0));
-    printf("TRUERESIDUAL(SCALED): %e\n", solver_calc_residual(handle, b.value, x.value, 1));
-
-    cc = solver_free_handle(handle);
 
     solver_finalize();
 

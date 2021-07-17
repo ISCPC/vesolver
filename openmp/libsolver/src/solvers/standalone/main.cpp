@@ -62,6 +62,8 @@ int main(int argc, char** argv) {
     Vector b, b0, x;
     char file_a[MAX_PATH_LEN], file_b[MAX_PATH_LEN];
     //double res = 1.0e-10;
+    //double res = 1.0e-8;
+    //double res = 1.0e-6;
     double res = 1.0e-4;
     //double res = 1.0e-1;
     int cc;

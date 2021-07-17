@@ -153,6 +153,11 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
         }
     }
 
+    if (Matrix_optimize(A) < 0) {
+        free(A);
+        return NULL;
+    }
+
     A->info = (void*)factor;
     return A;
 }

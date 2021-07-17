@@ -295,11 +295,15 @@ void Matrix_init(Matrix_t *A) {
     A->indice = NULL;
     A->values = NULL;
     A->info = NULL;
+    A->optimized = 0;
 }
 
 void Matrix_free(Matrix_t *A) {
     /* Destruction of the handle */
-    sblas_destroy_matrix_handle(A->hdl);
+    if (A->optimized == 1) {
+        sblas_destroy_matrix_handle(A->hdl);
+        A->optimized = 0;
+    }
 
     Matrix_free_common(A);
 }
@@ -323,6 +327,7 @@ int Matrix_optimize(Matrix_t *A) {
         exit(1);
     }
 
+    A->optimized = 1;
     return 0;
 }
 

@@ -7,7 +7,7 @@
 #include "PluginAPI.h"
 
 #define HUTI_MAXIT          50000
-#define HUTI_DBUGLVL        100
+#define HUTI_DBUGLVL        1000
 //#define HUTI_TOLERANCE      1.0e-8
 #define HUTI_MAXTOLERANCE   1.0e+5
 
@@ -17,7 +17,7 @@
 #define HUTI_MAXITER           -3
 
 //#define SCALING 1
-//#define DIAGONAL 1
+#define DIAGONAL 1
 //#define CALCULIX_NORM 1
 
 typedef struct elmer_info {
@@ -46,6 +46,11 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
         for (int j=A->pointers[i]; j<A->pointers[i+1]; j++) {
             A->values[j] *= (factor[i]) * (factor[A->indice[j]]);
         }
+    }
+
+    if (Matrix_optimize(A) < 0) {
+        free(A);
+        return NULL;
     }
 
     info->factor = factor;
