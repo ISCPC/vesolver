@@ -40,7 +40,6 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
 
     HS_int_t isym = MATRIX_IS_SYMMETRIC(A) ? HS_SYMMETRIC : HS_UNSYMMETRIC;
     HS_int_t iformat = MATRIX_IS_CSR(A) ? HS_CSR : HS_CSC;
-    //HS_int_t iformat = HS_CSC;
     
     ierr = HS_init_handle(&(info->hnd), A->NROWS, A->NROWS, isym, iformat);
     if (ierr != HS_RESULT_OK) {
@@ -103,7 +102,11 @@ static int solve(const Matrix_t *A, const double* b, double* x, const double tol
     TIMELOG_END(tl, "hs_solve");
     FTRACE_REGION_END("HS_solve");
     if (ierr != HS_RESULT_OK) {
-        fprintf(stderr, "ERROR: HS_solve_rd failed with %d.\n", ierr);
+        if (ierr == HS_ERROR_ACCURACY) {
+            fprintf(stderr, "ERROR: HS_solve_rd failed with HS_ERROR_ACCURACY (res=%e).\n", res);
+        } else {
+            fprintf(stderr, "ERROR: HS_solve_rd failed with %d.\n", ierr);
+        }
         return -1;
     }
 

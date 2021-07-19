@@ -50,6 +50,7 @@ Matrix_t* Matrix_duplicate(const Matrix_t* A) {
     D->NROWS = A->NROWS;
     D->NNZ = A->NNZ;
     D->flags = A->flags;
+    D->info = NULL;
 
     D->pointers = (int*)calloc(sizeof(int), A->NROWS+1);
     D->indice = (int*)calloc(sizeof(int), A->NNZ);
@@ -208,6 +209,7 @@ void Matrix_init(Matrix_t *A) {
     A->indice = NULL;
     A->values = NULL;
     A->info = NULL;
+    A->optimized = 0;
 
     if (mkl_enable_instructions(MKL_ENABLE_AVX512) != 0) {
         printf("INFO: AVX-512 enabled.\n");
@@ -215,8 +217,10 @@ void Matrix_init(Matrix_t *A) {
 }
 
 void Matrix_free(Matrix_t *A) {
-    mkl_sparse_destroy(A->hdl);
-    A->optimized = 0;
+    if (A->optimized == 1) {
+        mkl_sparse_destroy(A->hdl);
+        A->optimized = 0;
+    }
 
     Matrix_free_common(A);
 }

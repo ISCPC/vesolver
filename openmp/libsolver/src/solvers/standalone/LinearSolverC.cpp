@@ -66,12 +66,11 @@ public:
     }
 
     int optimize() override {
-        D = solver->solve_pre(A);
-        return (D != NULL) ? Matrix_optimize(D) : -1;
+    	D = solver->solve_pre(A);
+        return (D != NULL) ? 0 : -1;
     }
 
     int solve(const double* b, double* x, const double res)  override {
-        //res=1.e-4;
         return (D != NULL) ? solver->solve(D, b, x, res) : -1;
     }
 
