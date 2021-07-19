@@ -106,12 +106,19 @@ int solver_set_matrix_csr(SolverHandle_t hdl,
     Matrix_setMatrixCSR(A, neq, nnz, pointers, indice, value, flags);
     TIMELOG_END(tl, "setMatrix");
 
+#if 0 /* DEBUG */
+    printf("INFO: Matrix_A: %s, %s, INDEX_%d, nrows=%ld, nnz=%ld, flags=0x%08x\n", 
+        MATRIX_IS_CSR(A) ? "CSR" : "CSC", MATRIX_IS_SYMMETRIC(A) ? "SYMMETRIC" : "ASYMMETRIC",
+        MATRIX_INDEX_TYPE(A), neq, nnz, flags);
+#endif
+
 	// Optimize Coefficient Matrix internally
 	TIMELOG_START(tl);
-	D = solver->solve_pre(A);
+    D = Matrix_duplicate(A);
+	int cc = solver->solve_pre(D);
     TIMELOG_END(tl, "preProcess");
 
-    return (D != NULL) ? 0 : -1;
+    return cc;
 }
 
 int solver_solve(SolverHandle_t hdl, const double* b, double* x, const double res) {

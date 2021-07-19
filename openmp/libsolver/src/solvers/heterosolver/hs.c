@@ -29,11 +29,10 @@ typedef struct hs_info {
 /*
  * API
  */
-static Matrix_t* solve_pre(const Matrix_t* A0) {
+static int solve_pre(Matrix_t* A) {
     int ierr;
     TIMELOG(tl);
 
-    Matrix_t* A = Matrix_duplicate(A0);
     //Matrix_convert_index(A, 1);
 
     hs_info_t* info = (hs_info_t*)malloc(sizeof(hs_info_t));
@@ -44,20 +43,20 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
     ierr = HS_init_handle(&(info->hnd), A->NROWS, A->NROWS, isym, iformat);
     if (ierr != HS_RESULT_OK) {
         fprintf(stderr, "ERROR: HS_init_handle failed with %d.\n", ierr);
-        return NULL;
+        return -1;
     }
 
     ierr = HS_set_option(info->hnd, HS_ORDP, HS_ORDP_METIS);
     if (ierr != HS_RESULT_OK) {
         fprintf(stderr, "ERROR: HS_set_option(HS_ORDP) failed with %d.\n", ierr);
-        return NULL;
+        return -1;
     }
 
     if (MATRIX_INDEX_TYPE(A) == 1) {
         ierr = HS_set_option(info->hnd, HS_INDEXING, HS_INDEXING_1);
         if (ierr != HS_RESULT_OK) {
             fprintf(stderr, "ERROR: HS_set_option(HS_INDEXING) failed with %d.\n", ierr);
-            return NULL;
+            return -1;
         }
     }
 
@@ -68,7 +67,7 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
     FTRACE_REGION_END("HS_preprocess");
     if (ierr != HS_RESULT_OK) {
         fprintf(stderr, "ERROR: HS_preprocess_rd failed with %d.\n", ierr);
-        return NULL;
+        return -1;
     }
 
     FTRACE_REGION_BEGIN("HS_factorize");
@@ -78,14 +77,14 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
     FTRACE_REGION_END("HS_factorize");
     if (ierr != HS_RESULT_OK) {
         fprintf(stderr, "ERROR: HS_factorize_rd failed with %d.\n", ierr);
-        return NULL;
+        return -1;
     }
 
     A->info = (void*)info;
-    return A;
+    return 0;
 }
 
-static int solve(const Matrix_t *A, const double* b, double* x, const double tolerance) {
+static int solve(Matrix_t *A, const double* b, double* x, const double tolerance) {
     int ierr;
     TIMELOG(tl);
 

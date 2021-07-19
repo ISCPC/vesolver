@@ -322,8 +322,7 @@ static void PCG (const Matrix_t *A, double *b, double *x, double *eps, ITG *nite
 /*
  * API
  */
-static Matrix_t* solve_pre(const Matrix_t* A0) {
-    Matrix_t* A = Matrix_duplicate(A0);
+static int solve_pre(Matrix_t* A) {
     double* factor = (double*)calloc(sizeof(double), A->NROWS);
     if (factor == NULL) {
         return NULL;
@@ -345,15 +344,15 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
 
     if (Matrix_optimize(A) < 0) {
         free(A);
-        return NULL;
+        return -1;
     }
 
     Matrix_transpose(A);
     A->info = (void*)factor;
-    return A;
+    return 0;
 }
 
-static int solve(const Matrix_t *A, const double* b, double* x, const double res) {
+static int solve(Matrix_t *A, const double* b, double* x, const double res) {
     ITG neq = A->NROWS;
     double eps = res;
 

@@ -18,8 +18,7 @@ int pardiso_(long long *pt, INT_T *maxfct, INT_T *mnum, INT_T *mtype, INT_T *pha
         INT_T *n, double *a, INT_T *ia, INT_T *ja, INT_T *perm, INT_T *nrhs,
         INT_T *iparm, INT_T *msglvl, const double *b, double *x, INT_T *error);
 
-static Matrix_t* solve_pre(const Matrix_t* A0) {
-    Matrix_t* A = Matrix_duplicate(A0);
+static int solve_pre(Matrix_t* A) {
     Matrix_convert_index(A, 1);
 
     pardiso_info_t* info = (pardiso_info_t*)malloc(sizeof(pardiso_info_t));
@@ -47,14 +46,14 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
 
     if (error != 0) {
         printf("ERROR: pardiso_factorize (error=%d)\n", error);
-        return NULL;
+        return -1;
     }
 
     A->info = (void*)info;
-    return A;
+    return 0;
 }
 
-static int solve(const Matrix_t *A, const double* b, double* x, const double tolerance) {
+static int solve(Matrix_t *A, const double* b, double* x, const double tolerance) {
     INT_T neq = A->NROWS;
     INT_T maxfct=1, mnum=1, nrhs=1, *perm=NULL, msglvl=0, error=0;
     INT_T mtype = MATRIX_IS_SYMMETRIC(A) ? -2 : 11;
@@ -106,8 +105,6 @@ static int solve_post(Matrix_t* A) {
         printf("ERROR: pardiso_cleanup (error=%d)\n", error);
         return -1;
     }
-
-    Matrix_free(A);
 
     return 0;
 }

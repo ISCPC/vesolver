@@ -50,14 +50,12 @@ static inline void pcondl(const Matrix_t* A, double* u, double* v) {
 /*
  * API
  */
-static Matrix_t* solve_pre(const Matrix_t* A0) {
-    Matrix_t* A = Matrix_duplicate(A0);
-
+static int solve_pre(Matrix_t* A) {
     elmer_info_t* info = (elmer_info_t*)malloc(sizeof(elmer_info_t));
 #ifdef SCALING
     double* factor = (double*)calloc(sizeof(double), A->NROWS);
     if (factor == NULL) {
-        return NULL;
+        return -1;
     }
 
     Matrix_convert_index(A, 0);
@@ -78,7 +76,7 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
 #ifdef DIAGONAL
     double* diag = (double*)calloc(sizeof(double), A->NROWS);
     if (diag == NULL) {
-        return NULL;
+        return -1;
     }
 
     Matrix_convert_index(A, 0);
@@ -111,14 +109,14 @@ static Matrix_t* solve_pre(const Matrix_t* A0) {
 
     if (Matrix_optimize(A) < 0) {
         free(A);
-        return NULL;
+        return -1;
     }
 
     A->info = (void*)info;
-    return A;
+    return 0;
 }
 
-static int solve(const Matrix_t *A, const double* b, double* x, const double tolerance) {
+static int solve(Matrix_t *A, const double* b, double* x, const double tolerance) {
     // Local variables
     double rho, oldrho, alpha, beta;
     int iter_count;

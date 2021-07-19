@@ -52,9 +52,13 @@ public:
     };
 
     int finalize() override {
-        if (solver->solve_post(D) != 0) {
-            printf("WARNING: PostProcess() failed.\n");
+        if (D != NULL) {
+            if (solver->solve_post(D) != 0) {
+                printf("WARNING: PostProcess() failed.\n");
+            }
+            Matrix_free(D);
         }
+
         Matrix_free(A);
         return 0;
     };
@@ -66,8 +70,8 @@ public:
     }
 
     int optimize() override {
-    	D = solver->solve_pre(A);
-        return (D != NULL) ? 0 : -1;
+        D = Matrix_duplicate(A);
+    	return solver->solve_pre(D);
     }
 
     int solve(const double* b, double* x, const double res)  override {
