@@ -106,9 +106,10 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_CG);
+    //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_CG_SYM);
+    vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_CG_ASYM);
     //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_BICGSTAB2);
-    vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_DIRECT_HS);
+    //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_DIRECT_HS);
 
     for(int n=0; n<3; n++) {
         TIMELOG_START(tl1);

@@ -35,12 +35,14 @@ double solver_calc_residual(SolverHandle_t hdl, const double* b, const double* x
 //
 // Option
 //
-#define SOLVER_OPTION_SOLVER       1
+#define SOLVER_OPTION_SOLVER        1
 
-#define SOLVER_ITER_CG             1
-#define SOLVER_ITER_BICGSTAB2      2
-#define SOLVER_DIRECT_HS           3
-#define SOLVER_DIRECT_PARDISO      4
+#define SOLVER_ITER_CG_SYM          1
+#define SOLVER_ITER_CG_ASYM         2
+#define SOLVER_ITER_BICGSTAB2       3
+
+#define SOLVER_DIRECT_HS         1000
+#define SOLVER_DIRECT_PARDISO    1001
 
 #endif /* COMMON_LINEARSOLVER_H_ */
 

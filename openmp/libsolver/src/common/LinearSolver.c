@@ -22,8 +22,9 @@ static SolverPlugin_t* solver;
 /*
  * Internal functions
  */
-SolverPlugin_t* bicgstab2_init();
 SolverPlugin_t* cg_init();
+SolverPlugin_t* elmer_cg_init();
+SolverPlugin_t* bicgstab2_init();
 #ifdef SXAT
 SolverPlugin_t* hs_init();
 #endif
@@ -33,8 +34,11 @@ SolverPlugin_t* pardiso_init();
 
 static SolverPlugin_t* get_solver(int solverId) {
 	switch(solverId) {
-	case SOLVER_ITER_CG:
+	case SOLVER_ITER_CG_SYM:
 		return cg_init();
+
+	case SOLVER_ITER_CG_ASYM:
+		return elmer_cg_init();
 
 	case SOLVER_ITER_BICGSTAB2:
 		return bicgstab2_init();

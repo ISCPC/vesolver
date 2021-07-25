@@ -1,5 +1,7 @@
 DISTSDIR=../../dists
 
+INSTALL = /usr/bin/install 
+
 SRCDIR = ../src
 INCDIR=$(DISTSDIR)/ve/include
 LIBDIR=$(DISTSDIR)/ve/lib
@@ -28,4 +30,4 @@ clean:
 	rm $(OBJS2) libsolver.so
 
 install:
-	cp -i libvesolver.so $(LIBDIR)/
+	$(INSTALL) -D libvesolver.so $(LIBDIR)/libvesolver.so

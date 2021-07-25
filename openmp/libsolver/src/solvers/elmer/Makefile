@@ -18,9 +18,9 @@ include ../standalone/Make.icc
 #######
 SOLVERDIR = .
 
-CMDS = bicgstab2 cg
-SOLVER_SRC = bicgstab2.c cg.c
-SOLVER_OBJ = bicgstab2.o cg.o
+CMDS = bicgstab2 elmer_cg
+SOLVER_SRC = bicgstab2.c elmer_cg.c
+SOLVER_OBJ = bicgstab2.o elmer_cg.o
 
 all: $(CMDS)
 
@@ -30,7 +30,7 @@ $(SOLVER_OBJ): $(SOLVER_SRC)
 bicgstab2: $(COMMON_OBJS) bicgstab2.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-cg: $(COMMON_OBJS) cg.o
+elmer_cg: $(COMMON_OBJS) elmer_cg.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:

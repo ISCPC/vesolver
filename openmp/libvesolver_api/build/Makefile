@@ -1,4 +1,6 @@
-DISTSDIR=../../dists
+DESTDIR=../../dists
+
+INSTALL = /usr/bin/install
 
 INCLUDEDIR=../include
 SRCDIR=../src
@@ -26,5 +28,4 @@ clean:
 	-rm *.o $(LIB)
 
 install:
-	cp -i $(LIB) $(DISTSDIR)/lib/
-	cp -i $(INCLUDEDIR)/vesolver.h $(DISTSDIR)/include/
+	$(INSTALL) -D $(LIB) $(DESTDIR)/lib/$(LIB)
