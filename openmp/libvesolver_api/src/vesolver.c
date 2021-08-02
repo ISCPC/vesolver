@@ -11,12 +11,17 @@
 
 #ifdef SXAT
 #include <ve_offload.h>
+typedef struct veo_proc_handle veo_proc_handle;
+typedef struct veo_thr_ctxt veo_thr_ctxt;
+typedef struct veo_args veo_args;
+
 #else
 // Dummy VEO prototype definition to avoid build error
 typedef void veo_proc_handle;
 typedef void veo_thr_ctxt;
 typedef void veo_args;
 
+int veo_api_version(); 
 veo_proc_handle* veo_proc_create(int venode) {return NULL;}
 int veo_proc_destroy(veo_proc_handle* proc) {return -1;}
 uint64_t veo_load_library(veo_proc_handle* proc, const char* libname) {return 0;}
@@ -191,9 +196,24 @@ static inline uint64_t veo_call_sync_wrapper(const vesolver_context_t* context, 
  * API functions
  */
 int vesolver_init() {
+    int venum = 0;
+    int version = veo_api_version();
+
+    printf("INFO: SX-Aurora TSUBASA VE Offloading API version: %d\n", version);
+
+    if (version != 9) {
+        printf("WARNING: unsupported VE Offloading API.\n");
+    }
+
+    char* venum_str = getenv("VE_NODE_NUMBER");
+    if (venum_str != NULL) {
+        venum = atoi(venum_str);
+    }
+    printf("INFO: Using VE%d\n", venum);
+
     vesolver_instance_t* instance = &instances[0];
 
-    instance->proc = veo_proc_create(0);
+    instance->proc = veo_proc_create(venum);
     if (instance->proc == NULL) {
         printf("ERROR: Creating VE offload process failed.\n");
         fflush(stdout);

@@ -6,7 +6,7 @@ INCLUDEDIR=../include
 SRCDIR=../src
 
 CC = gcc
-CFLAGS = -std=c99 -O3 -g -fpic -I../include -I/opt/nec/ve/veos/include -c ../src/vesolver.c
+CFLAGS = -std=c99 -O3 -g -fpic -DSXAT -I../include -I/opt/nec/ve/veos/include -c ../src/vesolver.c
 
 LDFLAGS = -L/opt/nec/ve/veos/lib64 -Wl,-rpath=/opt/nec/ve/veos/lib64 -lveo
 
