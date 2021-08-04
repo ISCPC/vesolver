@@ -7,16 +7,18 @@ COMMON_C_SRC = Matrix.c
 COMMON_C_SRCDIR = ../../common
 
 CXXFLAGS = -g -D_STANDALONE
+#CXXFLAGS += -DSORT_CSR
 CFLAGS = -g -D_STANDALONE
 FFLAGS = -g -D_STANDALONE
 LDFLAGS = -lstdc++
 
+#include ../standalone/Make.fccpx
 include ../standalone/Make.fcc
 
 #######
 SOLVERDIR = .
 
-CMDS = ssl2_c
+CMDS = ssl2
 SOLVER_SRC = ssl2.c
 SOLVER_OBJ = ssl2.o
 
@@ -28,7 +30,7 @@ solver.o: solver.F90
 $(SOLVER_OBJ): $(SOLVER_SRC)
 	$(CC) $(CFLAGS) -c $^
 
-ssl2_c: $(COMMON_OBJS) ssl2.o solver.o
+ssl2: $(COMMON_OBJS) ssl2.o solver.o
 	$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:

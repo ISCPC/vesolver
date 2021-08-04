@@ -6,6 +6,7 @@
 #include <float.h>
 #include <stdint.h>
 #include "Matrix.h"
+#include "PluginAPI.h"
 #include "timelog.h"
 
 typedef struct ellpack_info {
@@ -134,6 +135,7 @@ static int csr2ellpack_asym(Matrix_t* A) {
     printf("*** step 2: Fill matrix *** \n");
     info->COEF = (double*)calloc(sizeof(double), neq*nw);
     info->ICOL = (int32_t*)calloc(sizeof(int32_t), neq*nw);
+    info->factor = NULL;
 
     // Fill matrix
     int* ku = (int*)calloc(sizeof(int), neq);
@@ -162,8 +164,10 @@ static int csr2ellpack_asym(Matrix_t* A) {
     return 0;
 }
 
-Matrix_t* PreProcess(const Matrix_t* A0) {
-    Matrix_t* A = Matrix_duplicate(A0);
+/*
+ * API
+ */
+static int solve_pre(Matrix_t* A) {
     Matrix_convert_index(A, 0);
 
     if (MATRIX_IS_SYMMETRIC(A)) {
@@ -171,25 +175,10 @@ Matrix_t* PreProcess(const Matrix_t* A0) {
     } else {
         csr2ellpack_asym(A);
     }
-    return A;
-}
-
-int PostProcess(Matrix_t* A) {
-    ellpack_info_t* info = (ellpack_info_t*)(A->info);
-
-    if (info) {
-        if(info->COEF) free(info->COEF);
-        if(info->ICOL) free(info->ICOL);
-        if(info->factor) free(info->factor);
-        free(A->info);
-        A->info = NULL;
-    }
-
-    Matrix_free(A);
     return 0;
 }
 
-int LinearSolve(const Matrix_t *A, const double *b, double *x, const double tolerance) {
+static int solve(Matrix_t *A, const double* b, double* x, const double tolerance) {
     int32_t neq = A->NROWS;
     ellpack_info_t* info = (ellpack_info_t*)(A->info);
     int32_t ierr;
@@ -213,4 +202,44 @@ int LinearSolve(const Matrix_t *A, const double *b, double *x, const double tole
     }
 
     return ierr;
+}
+
+
+static int solve_post(Matrix_t* A) {
+    ellpack_info_t* info = (ellpack_info_t*)(A->info);
+
+    if (info) {
+        if(info->COEF) free(info->COEF);
+        if(info->ICOL) free(info->ICOL);
+        if(info->factor) free(info->factor);
+        free(A->info);
+        A->info = NULL;
+    }
+
+    //Matrix_free(A);
+    return 0;
+}
+
+
+static void solve_free(SolverPlugin_t* solver) {
+	return;
+}
+
+/*
+ * Solver Plugin Interface
+ */
+#ifdef _STANDALONE
+SolverPlugin_t* solver_init() {
+#else
+SolverPlugin_t* ssl2_init() {
+#endif
+	SolverPlugin_t* solver = (SolverPlugin_t*)malloc(sizeof(SolverPlugin_t));
+
+	solver->set_option = NULL;
+	solver->solve_pre = solve_pre;
+	solver->solve = solve;
+	solver->solve_post = solve_post;
+	solver->free = solve_free;
+
+	return solver;
 }

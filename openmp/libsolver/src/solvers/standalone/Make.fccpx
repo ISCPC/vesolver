@@ -1,9 +1,9 @@
 #
 # Architechture dependent part : FX1000
 #
-CC = fcc
-CXX = FCC
-FC = frt
+CC = fccpx
+CXX = FCCpx
+FC = frtpx
 
 #SSL2FLAGS = -SSL2
 SSL2FLAGS += -SSL2BLAMP

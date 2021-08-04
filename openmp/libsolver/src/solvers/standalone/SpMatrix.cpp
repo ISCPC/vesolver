@@ -75,7 +75,6 @@ int SpMatrix::alloc(int64_t nrows, int64_t nnz) {
 }
 
 int SpMatrix::sort() {
-    int max_ncol = 0;
     int* work_ind = (int*)calloc(sizeof(int), nrow);
     double* work_val = (double*)calloc(sizeof(double), nrow);
 
