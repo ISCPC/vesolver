@@ -65,6 +65,7 @@ public:
     int load_file(const char *filename, bool oldflag=false);
     int alloc(int64_t neq, int64_t nnz);
     int transpose();
+    int sort();
 
     UINT_T    type;
     INT_T    *pointers;
@@ -82,6 +83,7 @@ public:
 
 protected:
     bool    selfAllocated;
+
 };
 
 class SpDistMatrix : public SpMatrix {

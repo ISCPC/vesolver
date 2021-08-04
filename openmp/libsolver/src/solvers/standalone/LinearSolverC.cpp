@@ -26,6 +26,7 @@ SOFTWARE.
 #include "LinearSolver.hpp"
 #include "Matrix.h"
 #include "PluginAPI.h"
+#include "timelog.h"
 
 extern "C" {
 	SolverPlugin_t* solver_init();
@@ -81,9 +82,15 @@ public:
     double residual(const double* b, const double* x, const int mode) override {
         double *z = (double*)calloc(sizeof(double), A->NROWS);
         double res = 0.0f;
+        TIMELOG(tl1);
 
+        TIMELOG_START(tl1);
         int cc = Matrix_optimize(A);
+        TIMELOG_END(tl1, "Resisual_optimize");
+
+        TIMELOG_START(tl1);
         Matrix_MV(A, 1.0, x, -1.0, b, z);
+        TIMELOG_END(tl1, "Ressual_MV");
         res = DNRM2(A->NROWS, z);
 
         if (mode == 1) {

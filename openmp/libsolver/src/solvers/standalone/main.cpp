@@ -11,6 +11,7 @@
 
 uint32_t load_matrix(SpMatrix &A, char* file_a) {
     uint32_t flags=0;
+    TIMELOG(tl1);
 
     /* Load Matrix A */
     bool oldflag = getenv("SPMATRIX_FORMAT_OLD") ? true : false;
@@ -21,6 +22,12 @@ uint32_t load_matrix(SpMatrix &A, char* file_a) {
             exit(1);
         }
     }
+
+#ifdef SORT_CSR
+    TIMELOG_START(tl1);
+    A.sort();
+    TIMELOG_END(tl1, "Sorting");
+#endif
 
     if ((A.type & 0xf) == SPMATRIX_TYPE_CSR) {
         flags |= MATRIX_TYPE_CSR;

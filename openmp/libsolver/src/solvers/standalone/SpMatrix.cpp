@@ -74,6 +74,57 @@ int SpMatrix::alloc(int64_t nrows, int64_t nnz) {
     return (value) ? 0 : -1;
 }
 
+int SpMatrix::sort() {
+    int max_ncol = 0;
+    int* work_ind = (int*)calloc(sizeof(int), nrow);
+    double* work_val = (double*)calloc(sizeof(double), nrow);
+
+    if (type & SPMATRIX_TYPE_INDEX1) {
+        return 0;
+    }
+
+    for(int i=0; i<nrow; i++) {
+        int ncol = pointers[i+1] - pointers[i];
+        if (ncol == 1) continue;
+
+        int min_col, max_col;
+        min_col = max_col = indice[pointers[i]];
+        for(int j=pointers[i]+1; j<pointers[i+1]; j++) {
+            if (indice[j] > max_col) {
+                max_col = indice[j];
+            }
+            if (indice[j] < min_col) {
+                min_col = indice[j];
+            }
+        }
+
+        /* claer buf */
+        for (int k=0; k<(max_col-min_col+1); k++) {
+            work_ind[k] = -1;
+        }
+
+
+        for(int j=pointers[i]; j<pointers[i+1]; j++) {
+            work_ind[indice[j]-min_col] = 1;
+            work_val[indice[j]-min_col] = value[j];
+        }
+
+        int jj = pointers[i];
+        for (int k=0; k<(max_col-min_col+1); k++) {
+            if (work_ind[k] > 0) {
+                indice[jj] = min_col+k;
+                value[jj] = work_val[k];
+                jj++;
+            }
+        }
+    }
+
+    free(work_ind);
+    free(work_val);
+
+    return 0;
+}
+
 int SpMatrix::load_file(const char *filename, bool oldflag) {
     int fd;
     int32_t info[8];

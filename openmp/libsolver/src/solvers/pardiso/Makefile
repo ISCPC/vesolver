@@ -8,6 +8,7 @@ COMMON_C_SRC = Matrix.c
 COMMON_C_SRCDIR = ../../common
 
 CXXFLAGS = -g -D_STANDALONE
+#CXXFLAGS += -DSORT_CSR
 CFLAGS = -g -D_STANDALONE
 
 include ../standalone/Make.icc
