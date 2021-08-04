@@ -73,7 +73,7 @@ static struct veo_func_table {
         {"vesolver_solve", 0}
 };
 
-#define CCX_VEO_DEFAULT_LIBRARY_PATH "/opt/local/ve/lib/libLinearSolver.so"
+#define DEFAULT_VESOLVER_PATH "/opt/local/ve/lib/libvesolver.so"
 
 #define VESOLVER_INIT           0
 #define VESOLVER_FINALIZE       1
@@ -220,9 +220,9 @@ int vesolver_init() {
         return -1;
     }
 
-    char* libpath = getenv("CCX_VEO_LIBRARY_PATH");
+    char* libpath = getenv("VESOLVER_PATH");
     if (libpath == NULL) {
-        libpath = CCX_VEO_DEFAULT_LIBRARY_PATH;
+        libpath = DEFAULT_VESOLVER_PATH;
     }
 
     instance->veo_handle = veo_load_library(instance->proc, libpath);

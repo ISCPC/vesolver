@@ -29,3 +29,4 @@ clean:
 
 install:
 	$(INSTALL) -D $(LIB) $(DESTDIR)/lib/$(LIB)
+	$(INSTALL) -D $(INCLUDEDIR)/vesolver.h $(DESTDIR)/include/vesolver.h

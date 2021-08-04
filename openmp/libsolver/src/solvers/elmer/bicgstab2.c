@@ -46,11 +46,6 @@ static int solve_pre(Matrix_t* A) {
         }
     }
 
-    if (Matrix_optimize(A) < 0) {
-        free(A);
-        return -1;
-    }
-
     info->factor = factor;
 #endif
 #ifdef DIAGONAL
@@ -86,6 +81,12 @@ static int solve_pre(Matrix_t* A) {
 
     info->diag = diag;
 #endif /* DIAGONAL */
+
+    if (Matrix_optimize(A) < 0) {
+        free(A);
+        return -1;
+    }
+
     A->info = (void*)info;
     return 0;
 }
