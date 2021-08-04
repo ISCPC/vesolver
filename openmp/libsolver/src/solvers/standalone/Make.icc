@@ -6,8 +6,8 @@ CXX = icpc
 FC = ifort
 
 CXXFLAGS += -O3 -std=c++11 -DMKL
-#CFLAGS += -O3 -std=c11 -DMKL
-CFLAGS += -O3 -DMKL
+CFLAGS += -O3 -std=c11 -DMKL
+#CFLAGS += -O3 -DMKL
 FFLAGS += -O3 -fpp
 #LDFLAGS += -nofor_main
 LDFLAGS += -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
