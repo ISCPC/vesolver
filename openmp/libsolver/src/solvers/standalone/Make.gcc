@@ -5,10 +5,14 @@ CC = gcc
 CXX = g++
 FC = gfortran
 
+COMMON_C_SRC += Matrix_MKL.c
+
 #CXXFLAGS += -O3 -std=c++11 -march=native -mavx512f
 #CFLAGS += -O3 -std=c11 -march=native -mavx512f
-CXXFLAGS += -O3 -std=c++11 -march=native
-CFLAGS += -O3 -std=c11 -march=native
+#CXXFLAGS += -O3 -std=c++11 -march=native
+#CFLAGS += -O3 -std=c11 -march=native
+CXXFLAGS += -O3 -std=c++11
+CFLAGS += -O3 -std=c11
 FFLAGS += -O3
 
 ifeq ($(WITH_MKL),true)

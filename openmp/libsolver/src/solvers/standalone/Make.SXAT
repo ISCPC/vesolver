@@ -5,6 +5,8 @@ CC = ncc
 CXX = nc++
 FC = nfort
 
+COMMON_C_SRC += Matrix_SXAT.c
+
 CXXFLAGS += -O3 -DSXAT
 CFLAGS += -O3 -DSXAT
 FFLAGS += -O3
