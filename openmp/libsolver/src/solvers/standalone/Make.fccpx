@@ -5,6 +5,8 @@ CC = fccpx
 CXX = FCCpx
 FC = frtpx
 
+COMMON_C_SRC += Matrix_SSL2.c
+
 #SSL2FLAGS = -SSL2
 SSL2FLAGS += -SSL2BLAMP
 

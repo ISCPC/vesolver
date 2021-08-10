@@ -70,8 +70,8 @@ int main(int argc, char** argv) {
     char file_a[MAX_PATH_LEN], file_b[MAX_PATH_LEN];
     //double res = 1.0e-10;
     //double res = 1.0e-8;
-    //double res = 1.0e-6;
-    double res = 1.0e-4;
+    double res = 1.0e-6;
+    //double res = 1.0e-4;
     //double res = 1.0e-1;
     int cc;
     TIMELOG(tl1);
@@ -117,6 +117,7 @@ int main(int argc, char** argv) {
     }
     TIMELOG_END(tl1, "optimize");
 
+    printf("INFO: solving... (res=%le)\n", res);
     TIMELOG_START(tl1);
     cc = solver->solve(b.value, x.value, res);
     if (cc != 0) {

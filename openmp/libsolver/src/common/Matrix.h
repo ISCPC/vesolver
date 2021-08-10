@@ -61,13 +61,27 @@ typedef struct Matrix {
     int optimized;
 } Matrix_t;
 
+/*
+ * Generic Matrix operations
+ */
+void Matrix_init_generic(Matrix_t *A);
+void Matrix_free_generic(Matrix_t *A);
+int Matrix_optimize_generic(Matrix_t *A);
+int Matrix_MV_generic(const Matrix_t *A, const double alpha, const double* x, const double beta, const double* y, double* z);
+
+/*
+ * Architecture dependent Matrix operations (prototype for override)
+ */
 void Matrix_init(Matrix_t *A);
-void Matrix_setMatrixCSR(Matrix_t *A, const int nrows, const int nnz, const int *aptr,
-    const int *aind, const double *aval, const uint32_t flags);
 void Matrix_free(Matrix_t *A);
 int Matrix_optimize(Matrix_t *A);
 int Matrix_MV(const Matrix_t *A, const double alpha, const double* x, const double beta, const double* y, double* z);
 
+/*
+ * Architecture independent functions
+ */
+void Matrix_setMatrixCSR(Matrix_t *A, const int nrows, const int nnz, const int *aptr,
+    const int *aind, const double *aval, const uint32_t flags);
 Matrix_t* Matrix_duplicate(const Matrix_t* A);
 int Matrix_convert_index(Matrix_t* A, int base);
 int Matrix_transpose(Matrix_t* A);

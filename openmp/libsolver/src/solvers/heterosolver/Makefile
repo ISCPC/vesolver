@@ -1,13 +1,8 @@
 WITH_MKL=true
 WITH_MKL_SBLAS=true
 
-COMMON_CXX_SRC = main.cpp SpMatrix.cpp LinearSolverC.cpp
-COMMON_CXX_SRCDIR = ../standalone
-COMMON_C_SRC = Matrix.c
-COMMON_C_SRCDIR = ../../common
-
-CXXFLAGS = -g -D_STANDALONE
-CFLAGS = -g -D_STANDALONE
+CXXFLAGS = -g
+CFLAGS = -g
 LDFLAGS = -lheterosolver_openmp -lblas_sequential -fopenmp
 
 include ../standalone/Make.SXAT

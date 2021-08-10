@@ -5,6 +5,8 @@ CC = icc
 CXX = icpc
 FC = ifort
 
+COMMON_C_SRC += Matrix_MKL.c
+
 CXXFLAGS += -O3 -std=c++11 -DMKL
 CFLAGS += -O3 -std=c11 -DMKL
 #CFLAGS += -O3 -DMKL

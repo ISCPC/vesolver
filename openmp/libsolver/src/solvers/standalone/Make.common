@@ -1,9 +1,14 @@
 #
 # Makefile Common Part
 #
-CXXFLAGS += -fopenmp -D_TIMELOG -I. -I$(COMMON_CXX_SRCDIR) -I$(COMMON_C_SRCDIR)
-CFLAGS += -fopenmp -D_TIMELOG -I. -I$(COMMON_C_SRCDIR)
+CXXFLAGS += -fopenmp -D_STANDALONE -D_TIMELOG -I. -I$(COMMON_CXX_SRCDIR) -I$(COMMON_C_SRCDIR)
+CFLAGS += -fopenmp -D_STANDALONE -D_TIMELOG -I. -I$(COMMON_C_SRCDIR)
 FFLAGS += -fopenmp
+
+COMMON_CXX_SRC += main.cpp SpMatrix.cpp LinearSolverC.cpp
+COMMON_CXX_SRCDIR = ../standalone
+COMMON_C_SRC += Matrix.c
+COMMON_C_SRCDIR = ../../common
 
 #.cpp.o :
 %.o : $(COMMON_CXX_SRCDIR)/%.cpp
