@@ -19,8 +19,6 @@ typedef struct lis_info {
 
 static int solve_pre(Matrix_t* A) {
     LIS_INT ierr;
-    int argc=0;
-    char** argv=NULL;
     char string[STR_BUFSIZE];
 
     Matrix_convert_index(A, 0);
@@ -35,8 +33,6 @@ static int solve_pre(Matrix_t* A) {
     float LIS_AMG_THETA = 0.01;
     int itrmax = 1000;
     double err0 = 1.0e-6;
-
-	lis_initialize(&argc, &argv);
 
     // Matrix for Lis solver
 	ierr = lis_matrix_create(0, &(info->Matrix));
@@ -111,6 +107,7 @@ static int solve(Matrix_t *A, const double* b, double* x, const double tolerance
     // get iterations, final residue
     ierr = lis_solver_get_iter(info->solver, &itr);
     ierr = lis_solver_get_residualnorm(info->solver, &rr);
+    printf("INFO: lis_solve done. (itr=%d, residual=%le)\n", itr, rr);
 
     // FINAL RESULT
     for(int i=0; i<nn; i++) {
@@ -132,13 +129,14 @@ static int solve_post(Matrix_t* A) {
     // Release memories
     ierr = lis_solver_destroy(info->solver);
     ierr = lis_matrix_destroy(info->Matrix);
-
-	lis_finalize();
+    A->pointers = A->indice = A->values = NULL;
 
     return 0;
 }
 
 static void solve_free(SolverPlugin_t* solver) {
+	lis_finalize();
+
 	return;
 }
 
@@ -150,6 +148,9 @@ SolverPlugin_t* solver_init() {
 #else
 SolverPlugin_t* lis_init() {
 #endif
+    int argc=0;
+    char** argv=NULL;
+
 	SolverPlugin_t* solver = (SolverPlugin_t*)malloc(sizeof(SolverPlugin_t));
 
 	solver->set_option = NULL;
@@ -157,6 +158,8 @@ SolverPlugin_t* lis_init() {
 	solver->solve = solve;
 	solver->solve_post = solve_post;
 	solver->free = solve_free;
+
+	lis_initialize(&argc, &argv);
 
 	return solver;
 }
