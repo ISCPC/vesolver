@@ -129,7 +129,8 @@ static int solve_post(Matrix_t* A) {
     // Release memories
     ierr = lis_solver_destroy(info->solver);
     ierr = lis_matrix_destroy(info->Matrix);
-    A->pointers = A->indice = A->values = NULL;
+    A->pointers = A->indice = NULL;
+    A->values = NULL;
 
     return 0;
 }
