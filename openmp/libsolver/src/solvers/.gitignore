@@ -1,1 +1,7 @@
 /.ptp-sync-folder
+*/*.o
+*/*.out
+*/*.err
+*/*.stats
+*/*.sh
+*/*.log
