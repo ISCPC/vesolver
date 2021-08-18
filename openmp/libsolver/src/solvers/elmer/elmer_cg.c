@@ -16,8 +16,8 @@
 #define HUTI_DIVERGENCE        -2
 #define HUTI_MAXITER           -3
 
-//#define SCALING 1
-#define DIAGONAL 1
+#define SCALING 1
+//#define DIAGONAL 1
 //#define CALCULIX_NORM 1
 
 typedef struct elmer_info {
@@ -59,15 +59,34 @@ static int solve_pre(Matrix_t* A) {
     }
 
     Matrix_convert_index(A, 0);
-    /*  extract diagonal vector from matrix A  */
-    for (int i=0; i<A->NROWS; i++) {
-        factor[i] = 1.0/sqrt(A->values[A->pointers[i]]);
-    }
+    if (MATRIX_IS_SYMMETRIC(A)) {
+        /*  extract diagonal vector from matrix A  */
+        for (int i=0; i<A->NROWS; i++) {
+            factor[i] = 1.0/sqrt(A->values[A->pointers[i]]);
+        }
 
-    /*  scale matrix A  */
-    for (int i=0; i<A->NROWS; i++) {
-        for (int j=A->pointers[i]; j<A->pointers[i+1]; j++) {
-            A->values[j] *= (factor[i]) * (factor[A->indice[j]]);
+        /*  scale matrix A  */
+        for (int i=0; i<A->NROWS; i++) {
+            for (int j=A->pointers[i]; j<A->pointers[i+1]; j++) {
+                A->values[j] *= (factor[i]) * (factor[A->indice[j]]);
+            }
+        }
+    } else {
+        /*  extract diagonal vector from matrix A  */
+        for (int i=0; i<A->NROWS; i++) {
+            for (int j=A->pointers[i]; j<A->pointers[i+1]; j++) {
+                if (A->indice[j] == i) {
+                    factor[i] = 1.0/sqrt(A->values[j]);
+                    break;
+                }
+            }
+        }
+
+        /*  scale matrix A  */
+        for (int i=0; i<A->NROWS; i++) {
+            for (int j=A->pointers[i]; j<A->pointers[i+1]; j++) {
+                A->values[j] *= (factor[i]) * (factor[A->indice[j]]);
+            }
         }
     }
 
