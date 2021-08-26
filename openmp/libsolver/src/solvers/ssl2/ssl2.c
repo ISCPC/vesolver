@@ -9,12 +9,12 @@
 #include "PluginAPI.h"
 #include "timelog.h"
 
-typedef struct ellpack_info {
+typedef struct ssl2_info {
     int32_t nw;
     double* COEF;
     int32_t* ICOL;
     double* factor;
-} ellpack_info_t;
+} ssl2_info_t;
 
 
 void ssl2_vcge_(int32_t* k, int32_t* nw, int32_t* n, 
@@ -26,7 +26,7 @@ void ssl2_vbcse_(int32_t* k, int32_t* nw, int32_t* n,
     int32_t* ierr);
 
 static int csr2ellpack_sym(Matrix_t* A) {
-    ellpack_info_t* info = (ellpack_info_t*)malloc(sizeof(ellpack_info_t));
+    ssl2_info_t* info = (ssl2_info_t*)malloc(sizeof(ssl2_info_t));
     int32_t neq = A->NROWS;
     int32_t* iaptr = A->pointers;
     int32_t* iaind = A->indice;
@@ -116,7 +116,7 @@ static int csr2ellpack_sym(Matrix_t* A) {
 }
 
 static int csr2ellpack_asym(Matrix_t* A) {
-    ellpack_info_t* info = (ellpack_info_t*)malloc(sizeof(ellpack_info_t));
+    ssl2_info_t* info = (ssl2_info_t*)malloc(sizeof(ssl2_info_t));
     int32_t neq = A->NROWS;
     int32_t* iaptr = A->pointers;
     int32_t* iaind = A->indice;
@@ -180,7 +180,7 @@ static int solve_pre(Matrix_t* A) {
 
 static int solve(Matrix_t *A, const double* b, double* x, const double tolerance) {
     int32_t neq = A->NROWS;
-    ellpack_info_t* info = (ellpack_info_t*)(A->info);
+    ssl2_info_t* info = (ssl2_info_t*)(A->info);
     int32_t ierr;
     double eps = tolerance;
 
@@ -207,7 +207,7 @@ static int solve(Matrix_t *A, const double* b, double* x, const double tolerance
 
 
 static int solve_post(Matrix_t* A) {
-    ellpack_info_t* info = (ellpack_info_t*)(A->info);
+    ssl2_info_t* info = (ssl2_info_t*)(A->info);
 
     if (info) {
         if(info->COEF) free(info->COEF);

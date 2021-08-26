@@ -44,6 +44,12 @@
 extern "C" {
 #endif
 
+typedef struct ellpack_info {
+    int32_t nw;
+    double* COEF;
+    int32_t* ICOL;
+} ellpack_info_t;
+
 typedef struct Matrix {
     int NROWS;
     int NNZ;
@@ -51,6 +57,7 @@ typedef struct Matrix {
     int* pointers;
     int* indice;
     double* values;
+    ellpack_info_t _ellpack;
     void* info;
 #ifdef MKL
     sparse_matrix_t hdl;
@@ -59,7 +66,6 @@ typedef struct Matrix {
     sblas_handle_t hdl;
 #endif
 #ifdef SSL2
-    double *ax;
     double *w;
     int *iw;
 #endif
@@ -90,6 +96,7 @@ void Matrix_setMatrixCSR(Matrix_t *A, const int nrows, const int nnz, const int 
 Matrix_t* Matrix_duplicate(const Matrix_t* A);
 int Matrix_convert_index(Matrix_t* A, int base);
 int Matrix_transpose(Matrix_t* A);
+int Matrix_create_ellpack(Matrix_t* A);
 
 #ifdef __cplusplus
 }
