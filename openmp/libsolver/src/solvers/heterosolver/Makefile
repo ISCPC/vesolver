@@ -5,7 +5,9 @@ CXXFLAGS = -g
 CFLAGS = -g
 LDFLAGS = -lheterosolver_openmp -lblas_sequential -fopenmp
 
-include ../standalone/Make.SXAT
+BUILD_ENV = SXAT
+
+include ../standalone/Make.$(BUILD_ENV)
 
 #######
 SOLVERDIR = .

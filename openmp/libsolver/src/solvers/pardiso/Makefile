@@ -6,8 +6,9 @@ CXXFLAGS = -g
 #CXXFLAGS += -DSORT_CSR
 CFLAGS = -g
 
-include ../standalone/Make.icc
-#include ../standalone/Make.gcc
+BUILD_ENV = icc
+
+include ../standalone/Make.$(BUILD_ENV)
 
 #######
 SOLVERDIR = .

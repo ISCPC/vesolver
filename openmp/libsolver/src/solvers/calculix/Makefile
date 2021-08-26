@@ -5,10 +5,9 @@ WITH_ONEAPI=true
 CXXFLAGS = -g
 CFLAGS = -g
 
-include ../standalone/Make.icc
-#include ../standalone/Make.gcc
-#include ../standalone/Make.SXAT
-#include ../standalone/Make.fcc
+BUILD_ENV = gcc
+
+include ../standalone/Make.$(BUILD_ENV)
 
 #######
 SOLVERDIR = .
