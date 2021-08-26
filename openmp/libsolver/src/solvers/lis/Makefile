@@ -3,18 +3,16 @@ WITH_MKL_SBLAS=true
 WITH_ONEAPI=true
 
 #LIS_ROOT = /home/u/u906/local
-#LIS_ROOT = ../../../../../../dist
+LIS_ROOT = ../../../../../../dist
 
 CXXFLAGS = -g -I$(LIS_ROOT)/include
 #CXXFLAGS += -DSORT_CSR
 CFLAGS = -g -I$(LIS_ROOT)/include
 LDFLAGS = -L$(LIS_ROOT)/lib -llis -nofor-main -lstdc++
 
-include ../standalone/Make.icc
-#include ../standalone/Make.gcc
-#include ../standalone/Make.SXAT
-#include ../standalone/Make.fcc
-#include ../standalone/Make.fccpx
+BUILD_ENV = gcc
+
+include ../standalone/Make.$(BUILD_ENV)
 
 #######
 SOLVERDIR = .

@@ -58,6 +58,11 @@ typedef struct Matrix {
 #ifdef SXAT
     sblas_handle_t hdl;
 #endif
+#ifdef SSL2
+    double *ax;
+    double *w;
+    int *iw;
+#endif
     int optimized;
 } Matrix_t;
 

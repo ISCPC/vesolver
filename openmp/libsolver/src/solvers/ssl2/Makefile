@@ -12,8 +12,9 @@ CFLAGS = -g -D_STANDALONE
 FFLAGS = -g -D_STANDALONE
 LDFLAGS = -lstdc++
 
-#include ../standalone/Make.fccpx
-include ../standalone/Make.fcc
+BUILD_ENV = fccpx
+
+include ../standalone/Make.$(BUILD_ENV)
 
 #######
 SOLVERDIR = .

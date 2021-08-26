@@ -40,6 +40,17 @@ Matrix_t* Matrix_duplicate(const Matrix_t* A) {
     bcopy(A->indice, D->indice, sizeof(int)*(A->NNZ));
     bcopy(A->values, D->values, sizeof(double)*(A->NNZ));
 
+#ifdef MKL
+    D->hdl = 0;
+#endif
+#ifdef SXAT
+    D->hdl = 0;
+#endif
+#ifdef SSL2
+    D->ax = D->w = NULL;
+    D->iw = NULL;
+#endif
+
     return D;
 }
 
@@ -106,7 +117,11 @@ int Matrix_transpose(Matrix_t* A) {
     A->indice = aind;
     A->values = aval;
 
-    A->flags ^= MATRIX_TYPE_LOWER;
+    if (MATRIX_IS_SYMMETRIC(A)) {
+        A->flags ^= MATRIX_TYPE_LOWER;
+    } else {
+        A->flags ^= MATRIX_TYPE_CSR;
+    }
 
     return 0;
 }
@@ -160,8 +175,8 @@ int Matrix_MV_generic(const Matrix_t *A, const double alpha, const double* x, co
                 z[i] = (beta * y[i]) + (A->values[A->pointers[i]-1]* x[i]);
                 for (int j=A->pointers[i]; j<A->pointers[i+1]-1; j++) {
                     int k = A->indice[j]-1;
-                    z[i] += A->values[j] * x[k];
-                    z[k] += A->values[j] * x[i];
+                    z[i] += alpha * A->values[j] * x[k];
+                    z[k] += alpha * A->values[j] * x[i];
                 }
             }
         } else {

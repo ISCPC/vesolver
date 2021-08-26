@@ -82,6 +82,7 @@ public:
     double residual(const double* b, const double* x, const int mode) override {
         double *z = (double*)calloc(sizeof(double), A->NROWS);
         double res = 0.0f;
+#if 0
         TIMELOG(tl1);
 
         TIMELOG_START(tl1);
@@ -91,6 +92,9 @@ public:
         TIMELOG_START(tl1);
         Matrix_MV(A, 1.0, x, -1.0, b, z);
         TIMELOG_END(tl1, "Ressual_MV");
+#else
+        Matrix_MV_generic(A, 1.0, x, -1.0, b, z);
+#endif
         res = DNRM2(A->NROWS, z);
 
         if (mode == 1) {

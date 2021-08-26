@@ -199,6 +199,7 @@ static int solve(Matrix_t *A, const double* b, double* x, const double tolerance
         free(b1);
     } else {
         ssl2_vbcse_(&neq, &info->nw, &neq, info->COEF, info->ICOL, b, x, &eps, &ierr);
+        //ssl2_vtfqe_(&neq, &info->nw, &neq, info->COEF, info->ICOL, b, x, &eps, &ierr);
     }
 
     return ierr;
