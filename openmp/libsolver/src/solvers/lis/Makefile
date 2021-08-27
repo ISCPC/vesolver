@@ -2,7 +2,7 @@ WITH_MKL=true
 WITH_MKL_SBLAS=true
 WITH_ONEAPI=true
 
-#LIS_ROOT = /home/u/u906/local
+#LIS_ROOT = /home/uno/local
 LIS_ROOT = ../../../../../../dist
 
 CXXFLAGS = -g -I$(LIS_ROOT)/include
@@ -17,9 +17,9 @@ include ../standalone/Make.$(BUILD_ENV)
 #######
 SOLVERDIR = .
 
-CMDS = lis
-SOLVER_SRC = lis.c
-SOLVER_OBJ = lis.o
+CMDS = lis lis_csc lis_ell
+SOLVER_SRC = lis.c lis_csc.c lis_ell.c
+SOLVER_OBJ = lis.o lis_csc.o lis_ell.o
 
 all: $(CMDS)
 
@@ -27,6 +27,12 @@ $(SOLVER_OBJ): $(SOLVER_SRC)
 	$(CC) $(CFLAGS) -c $^
 
 lis: $(COMMON_OBJS) lis.o
+	$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS)
+
+lis_csc: $(COMMON_OBJS) lis_csc.o
+	$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS)
+
+lis_ell: $(COMMON_OBJS) lis_ell.o
 	$(FC) $(FFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:
