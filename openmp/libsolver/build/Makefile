@@ -10,11 +10,13 @@ CC = ncc
 CFLAGS = -O3 -fpic -I$(SRCDIR)/common -DSXAT -D_TIMELOG
 LDFLAGS = -fpic -shared -lcblas -lblas_openmp -lsblas_openmp
 
-CSRCS = $(SRCDIR)/common/LinearSolver.c $(SRCDIR)/common/Matrix.c
+CSRCS = $(SRCDIR)/common/LinearSolver.c
+CSRCS += $(SRCDIR)/common/Matrix.c $(SRCDIR)/common/Matrix_SXAT.c
 CSRCS += $(SRCDIR)/solvers/elmer/bicgstab2.c
 CSRCS += $(SRCDIR)/solvers/elmer/elmer_cg.c
 CSRCS += $(SRCDIR)/solvers/calculix/cg.c
 CSRCS += $(SRCDIR)/solvers/heterosolver/hs.c
+#CSRCS += $(SRCDIR)/solvers/lis/lis.c
 
 .c.o :
 	$(CC) $(CFLAGS) -c $<
@@ -25,7 +27,8 @@ COBJS = $(CSRCS:.c=.o)
 FOBJS = $(FSRCS:.c=.o)
 OBJS = $(COBJS) $(FOBJS)
 
-OBJS2 = LinearSolver.o Matrix.o bicgstab2.o elmer_cg.o cg.o hs.o
+OBJS2 = LinearSolver.o Matrix.o Matrix_SXAT.o bicgstab2.o elmer_cg.o cg.o hs.o
+#OBJS2 += lis.o
 
 libsolver.so: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS2) $(LDFLAGS)

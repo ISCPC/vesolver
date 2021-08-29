@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <strings.h>
 #include "SpMatrix.h"
 #include "timelog.h"
@@ -106,10 +107,25 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_CG_SYM);
-    vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_CG_ASYM);
-    //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_ITER_BICGSTAB2);
-    //vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, VESOLVER_DIRECT_HS);
+    /*
+     * Set Solver type
+     */
+    int solver = VESOLVER_DIRECT_HS;
+
+    char* solver_str = getenv("SOLVER_TYPE");
+    if (solver_str) {
+        if (strcmp(solver_str, "ITER_CG") == 0) {
+            if ((A.type) & SPMATRIX_TYPE_SYMMETRIC) {
+                solver = VESOLVER_ITER_CG_SYM;
+            } else {
+                solver = VESOLVER_ITER_CG_ASYM;
+            }
+        } else if (strcmp(solver_str, "ITER_BICGSTAB2") == 0) {
+            solver = VESOLVER_ITER_BICGSTAB2;
+        }
+    }
+    printf("INFO: SolverType: %d\n", solver);
+    vesolver_set_option(hdl, VESOLVER_OPTION_SOLVER, solver);
 
     for(int n=0; n<3; n++) {
         TIMELOG_START(tl1);
