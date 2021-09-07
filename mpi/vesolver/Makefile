@@ -1,7 +1,7 @@
 #
 # Makefile for solverBench
 #
-WITH_AURORA=false
+WITH_AURORA=true
 
 #
 # Enable/Disable PARDISO
@@ -113,11 +113,6 @@ all: $(CMDS)
 OBJS = $(CXXSRCS:.cpp=.o)
 OBJS += $(CSRCS:.c=.o)
 
-libelmerapi.so: $(SRCDIR)/elmerSolver.c $(SRCDIR)/elmerSolverAPI.f90
-	$(CC) $(CFLAGS) -fPIC -c $(SRCDIR)/elmerSolver.c; \
-	$(FC) $(FFLAGS) -fPIC -c $(SRCDIR)/elmerSolverAPI.f90; \
-	$(FC) $(LDFLAGS) -shared -fPIC -o $@ elmerSolver.o elmerSolverAPI.o
-
 vesolver: $(OBJS) $(LIBS)
 ifeq ($(WITH_AURORA),true)
 	mpinfort $(FCFLAGS) $(LDOPT) $(LDFLAGS) -cxxlib -o $@ $^
@@ -149,8 +144,7 @@ endif
 endif
 
 dist:
-	cp $(CMDS) $(DISTDIR)/bin; \
-	cp libelmerapi.so $(DISTDIR)/lib
+	cp $(CMDS) $(DISTDIR)/bin;
 
 clean:
 	rm *.o $(CMDS) $(LIBS) 2> /dev/null || true

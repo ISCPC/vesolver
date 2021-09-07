@@ -20,6 +20,9 @@
 //#define DIAGONAL 1
 //#define CALCULIX_NORM 1
 
+// For use generic Matrix function for SX-Aurora TSUBASA
+//#define  Matrix_MV(A,alpha,x,beta,b,y)  Matrix_MV_generic(A,alpha,x,beta,b,y)
+
 typedef struct elmer_info {
     double* factor;
     double* diag;
