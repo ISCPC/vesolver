@@ -411,6 +411,7 @@ int Matrix_MV_generic(const Matrix_t *A, const double alpha, const double* x, co
                 }
             }
         } else {
+#if 1
             #pragma omp parallel for
             for(int i=0; i<A->NROWS; i++) {
                 z[i] = beta * y[i];
@@ -418,6 +419,55 @@ int Matrix_MV_generic(const Matrix_t *A, const double alpha, const double* x, co
                     z[i] += alpha * A->values[j] * x[A->indice[j]];
                 }
             }
+#else
+            if (beta != 0.0f) {
+                if (alpha == -1.0f) {
+                    #pragma omp parallel for
+                    for(int i=0; i<A->NROWS; i++) {
+                        z[i] = beta * y[i];
+                        for(int j=A->pointers[i]; j<A->pointers[i+1]; j++) {
+                            z[i] -= A->values[j] * x[A->indice[j]];
+                        }
+                    }
+                } else {
+                    #pragma omp parallel for
+                    for(int i=0; i<A->NROWS; i++) {
+                        z[i] = beta * y[i];
+                        for(int j=A->pointers[i]; j<A->pointers[i+1]; j++) {
+                            z[i] += alpha * A->values[j] * x[A->indice[j]];
+                        }
+                    }
+                }
+            } else {
+                if (alpha == 1.0f) {
+                    int j0;
+                    double t0;
+                    int* jj0 = A->indice;
+                    double* vv0 = A->values;
+                    #pragma omp parallel for private(j0,t0)
+                    for(int i=0; i<A->NROWS; i++) {
+                        t0 = 0.0f;
+                        int is = A->pointers[i];
+                        int ie = A->pointers[i+1];
+
+                        for(int j=is; j<ie; j++) {
+                            j0 = jj0[j];
+                            t0 += vv0[j] * x[j0];
+                            //t0 += vv0[j] * x[jj0[j]];
+                        }
+                        z[i] = t0;
+                    }
+                } else {
+                    #pragma omp parallel for
+                    for(int i=0; i<A->NROWS; i++) {
+                        z[i] = 0.0f;
+                        for(int j=A->pointers[i]; j<A->pointers[i+1]; j++) {
+                            z[i] += alpha * A->values[j] * x[A->indice[j]];
+                        }
+                    }
+                }
+            }
+#endif
         }
     }
     return 0;
