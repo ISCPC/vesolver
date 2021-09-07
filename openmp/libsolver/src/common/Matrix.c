@@ -255,6 +255,88 @@ int Matrix_create_ellpack(Matrix_t* A) {
     return 0;
 }
 
+/*
+ * Convert CSR to JAD
+ */
+struct sort_elem {
+    struct sort_elem* next;
+    int row;
+};
+
+struct sort_list {
+    struct sort_elem* top;
+    struct sort_elem* tail;
+    int nelems;
+};
+
+int Matrix_create_jad(Matrix_t* A) {
+    jad_info_t* jad = &(A->_jad);
+    Matrix_convert_index(A, 0);
+
+    /* Allocate temporary array */
+    struct sort_list* list = (struct sort_list*)calloc(sizeof(struct sort_list), A->NROWS+1);
+    struct sort_elem* elem = (struct sort_elem*)calloc(sizeof(struct sort_elem), A->NROWS);
+
+    if (MATRIX_IS_SYMMETRIC(A)) {
+        printf("ERROR: Sorry, Symmetric matrix is not support yet.");
+        return -1;
+    } else {
+        /* Allocate JAD */
+        jad->perm = (int32_t*)calloc(sizeof(int32_t), A->NROWS);
+        jad->index = (int32_t*)calloc(sizeof(int32_t), A->NNZ);
+        jad->value = (double*)calloc(sizeof(double), A->NNZ);
+
+        int maxnzr = 0;
+        for (int i=0; i<A->NROWS; i++) {
+            elem[i].row = i;
+            int ii = A->pointers[i+1]-A->pointers[i];
+
+            (list[ii].nelems)++;
+            if (list[ii].top == NULL) {
+                list[ii].top = list[ii].tail = &(elem[i]);
+            } else {
+                list[ii].tail = list[ii].tail->next = &(elem[i]);
+            }
+            if (ii > maxnzr) {
+                maxnzr = ii;
+            }
+        }
+
+        int i=0;
+        //printf("INFO: maxnzr = %d\n", maxnzr);
+        for (int j=maxnzr; j>=0; j--) {
+            //printf("INFO: j=%d, i=%d\n", j, i);
+            for (struct sort_elem* e=list[j].top; e!=NULL; e=e->next) {
+                jad->perm[i] = e->row;
+                i++;
+            }
+        }
+
+        int n = A->NROWS;
+        int k = 0;
+        jad->ptr = (int32_t*)calloc(sizeof(int32_t), maxnzr+1);
+        for (int i=0; i<=maxnzr; i++) {
+            n -= list[i].nelems;
+            jad->ptr[i] = k;
+            //printf("INFO: i, k = %d, %d -------\n", i, k);
+            for (int j=0; j<n; j++) {
+                int ii = A->pointers[jad->perm[j]]+i;
+                jad->index[k] = A->indice[ii];
+                jad->value[k] = A->values[ii];
+                //printf("INFO: (%d, %d) = %lf\n", jad->perm[j], jad->index[k], jad->value[k]);
+                k++;
+            }
+        }
+        jad->maxnzr = maxnzr;
+    }
+    //fflush(stdout);
+
+    free(elem);
+    free(list);
+
+    return 0;
+}
+
 /****************************************************************
  * Base Library
  ****************************************************************/

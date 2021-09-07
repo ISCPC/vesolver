@@ -50,6 +50,14 @@ typedef struct ellpack_info {
     int32_t* ICOL;
 } ellpack_info_t;
 
+typedef struct jad_info {
+    int32_t* perm;
+    int32_t* ptr;
+    int32_t* index;
+    double* value;
+    int32_t maxnzr;
+} jad_info_t;
+
 typedef struct Matrix {
     int NROWS;
     int NNZ;
@@ -58,6 +66,7 @@ typedef struct Matrix {
     int* indice;
     double* values;
     ellpack_info_t _ellpack;
+    jad_info_t _jad;
     void* info;
 #ifdef MKL
     sparse_matrix_t hdl;
@@ -97,6 +106,7 @@ Matrix_t* Matrix_duplicate(const Matrix_t* A);
 int Matrix_convert_index(Matrix_t* A, int base);
 int Matrix_transpose(Matrix_t* A);
 int Matrix_create_ellpack(Matrix_t* A);
+int Matrix_create_jad(Matrix_t* A);
 
 #ifdef __cplusplus
 }
