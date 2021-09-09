@@ -21,6 +21,7 @@ static int solve_pre(Matrix_t* A) {
     LIS_INT ierr;
     char string[STR_BUFSIZE];
 
+    Matrix_extract_symmetric(A);
     Matrix_convert_index(A, 0);
 
     lis_info_t* info = (lis_info_t*)malloc(sizeof(lis_info_t));
@@ -39,8 +40,16 @@ static int solve_pre(Matrix_t* A) {
 	ierr = lis_matrix_set_size(info->Matrix, 0, nn);
 
     // Setup Lis Matrix from CSR (Compressed Row Storage)
-    ierr = lis_matrix_set_csr(A->NNZ, A->pointers, A->indice, A->values, info->Matrix);
+    ierr = lis_matrix_set_csr(A->NNZ, A->pointers, A->indice, (LIS_SCALAR*)A->values, info->Matrix);
+    if (ierr != 0) {
+        fprintf(stderr,"ERROR: lis_matrixs_set_csr() fails with ierr=%d\n", ierr);
+        return -1;
+    }
     ierr = lis_matrix_assemble(info->Matrix);
+    if (ierr != 0) {
+        fprintf(stderr,"ERROR: lis_matrixs_set_assemble() fails with ierr=%d\n", ierr);
+        return -1;
+    }
 
     // Lis Solver
     ierr = lis_solver_create(&(info->solver));

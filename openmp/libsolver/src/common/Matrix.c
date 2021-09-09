@@ -26,7 +26,7 @@ void Matrix_setMatrixCSR(Matrix_t *A, const int nrows, const int nnz, const int 
 }
 
 Matrix_t* Matrix_duplicate(const Matrix_t* A) {
-    Matrix_t* D = malloc(sizeof(Matrix_t));
+    Matrix_t* D = (Matrix_t*)malloc(sizeof(Matrix_t));
     D->NROWS = A->NROWS;
     D->NNZ = A->NNZ;
     D->flags = A->flags;
@@ -126,6 +126,73 @@ int Matrix_transpose(Matrix_t* A) {
     return 0;
 }
 
+int Matrix_extract_symmetric(Matrix_t* A) {
+    if (!MATRIX_IS_SYMMETRIC(A)) {
+        return 0;
+    }
+    printf("INFO: Extracting symmetric matrix...\n");
+
+    Matrix_convert_index(A, 1);
+
+    int nrows = A->NROWS;
+    int nnz = A->NNZ*2 - A->NROWS;
+
+    int* pointers = (int*)calloc(sizeof(int), nrows+1);
+    int* indice = (int*)calloc(sizeof(int), nnz);
+    double* values = (double*)calloc(sizeof(double), nnz);
+
+    /* phase0: */
+    for(int i=0; i<nrows; i++) {
+        pointers[i] = A->pointers[i+1] - A->pointers[i]-1;
+        //printf("Phase0: A1->pointers[%d]=%d\n", i, pointers[i]);
+    }
+    pointers[nrows] = 0;
+
+    /* phase1 */
+    for(int i=0; i<A->NNZ; i++) {
+        int j = A->indice[i]-1;
+        pointers[j]++;
+    }
+    pointers[0]++;
+    for(int i=1; i<=nrows; i++) {
+        pointers[i] += pointers[i-1];
+    }
+    //for(int i=0; i<=nrows; i++) {
+    //    printf("Phase1: pointers[%d]=%d\n", i, pointers[i]);
+    //}
+
+    /* phase2 */
+    for (int i=A->NROWS-1; i>=0; i--) {
+        for (int j=A->pointers[i+1]-2; j>A->pointers[i]-2; j--) {
+            int jj = --(pointers[i]);
+            indice[jj-1] = A->indice[j];
+            values[jj-1] = A->values[j];
+            //printf("Phase2-1: A1(%d, %d) = %lf (jj=%d)\n", i+1, A->indice[j], A->values[j], jj);
+        }
+        for (int j=A->pointers[i]; j<A->pointers[i+1]-1; j++) {
+            int jj = --(pointers[A->indice[j]-1]);
+            indice[jj-1] = i+1;
+            values[jj-1] = A->values[j];
+            //printf("Phase2-2: A1(%d, %d) = %lf (jj=%d)\n", A->indice[j], indice[jj-1], A->values[j], jj);
+        }
+        //printf("--\n");
+    }
+
+    A->NNZ = nnz;
+    A->flags &= ~MATRIX_TYPE_SYMMETRIC;
+    free(A->pointers);
+    free(A->indice);
+    free(A->values);
+    A->pointers = pointers;
+    A->indice = indice;
+    A->values = values;
+
+    return 0;
+}
+
+/*
+ * Convert CSR to ELLPACK
+ */
 static int csr2ellpack_sym(Matrix_t* A) {
     ellpack_info_t* info = &(A->_ellpack);
     int32_t neq = A->NROWS;

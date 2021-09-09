@@ -105,6 +105,7 @@ void Matrix_setMatrixCSR(Matrix_t *A, const int nrows, const int nnz, const int 
 Matrix_t* Matrix_duplicate(const Matrix_t* A);
 int Matrix_convert_index(Matrix_t* A, int base);
 int Matrix_transpose(Matrix_t* A);
+int Matrix_extract_symmetric(Matrix_t* A);
 int Matrix_create_ellpack(Matrix_t* A);
 int Matrix_create_jad(Matrix_t* A);
 
