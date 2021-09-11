@@ -1,1 +1,1 @@
-make BUILD_ENV=SXAT
+make BUILD_ENV=SXAT $*

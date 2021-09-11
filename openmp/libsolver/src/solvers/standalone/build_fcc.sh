@@ -1,1 +1,1 @@
-make BUILD_ENV=fcc
+make BUILD_ENV=fcc $*

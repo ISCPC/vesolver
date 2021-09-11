@@ -6,6 +6,9 @@
 #include "Matrix.h"
 #include "timelog.h"
 #include "PluginAPI.h"
+
+#undef _COMPLEX // workaround to avoid conflict with cblas.h
+#include "lis_config.h"
 #include "lis.h"
 
 typedef int32_t INT_T;

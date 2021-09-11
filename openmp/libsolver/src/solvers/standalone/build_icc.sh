@@ -1,1 +1,1 @@
-make BUILD_ENV=icc
+make BUILD_ENV=icc $*

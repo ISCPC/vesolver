@@ -6,6 +6,9 @@
 #include "Matrix.h"
 #include "timelog.h"
 #include "PluginAPI.h"
+
+#undef _COMPLEX // workaround to avoid conflict with cblas.h
+#include "lis_config.h"
 #include "lis.h"
 
 typedef int32_t INT_T;
@@ -28,11 +31,44 @@ static int solve_pre(Matrix_t* A) {
     int nn = A->NROWS;
 
     // Parameters
+    //int SOLVER_number = 1; /* CG */
+    //int SOLVER_number = 2; /* BiCG */
+    //int SOLVER_number = 3; /* CGS */
     int SOLVER_number = 4; /* BiCGStab */
+    //int SOLVER_number = 5; /* BiCGStab(l) */
+    //int SOLVER_number = 6; /* GPBiCG */
+    //int SOLVER_number = 7; /* TFQMR */
+    //int SOLVER_number = 8; /* Orthomin(m) */
+    //int SOLVER_number = 9; /* GMRES(m) */
+    //int SOLVER_number = 10; /* Jacobi */
+    //int SOLVER_number = 11; /* Gauss-Seidel */
+    //int SOLVER_number = 12; /* SOR */
+    //int SOLVER_number = 13; /* BiCGSafe */
+    //int SOLVER_number = 14; /* CR */
+    //int SOLVER_number = 15; /* BiCR */
+    //int SOLVER_number = 16; /* CRS */
+    //int SOLVER_number = 17; /* BiCRSTAB */
+    //int SOLVER_number = 18; /* GPBiCR */
+    //int SOLVER_number = 19; /* BiCRSafe */
+    //int SOLVER_number = 20; /* FGMRES(m) */
+    //int SOLVER_number = 21; /* IDR(s) */
+    //int SOLVER_number = 22; /* IDR(1) */
+    //int SOLVER_number = 23; /* MINRES */
+    //int SOLVER_number = 24; /* COCG */
+    //int SOLVER_number = 25; /* COCR */
+
+    //int PRECOND_number = 0; /* None */
     int PRECOND_number = 1; /* Jacobi */
+    //int PRECOND_number = 2; /* ILU */
+    //int PRECOND_number = 3; /* SSOR */
+    //int PRECOND_number = 4; /* Hybrid */
+    //int PRECOND_number = 5; /* I+S */
+    //int PRECOND_number = 6; /* SAINV */
     //int PRECOND_number = 7; /* SA-AMG */
+    //int PRECOND_number = 8; /* Cront ILU */
+    //int PRECOND_number = 9; /* ILUT */
     float LIS_AMG_THETA = 0.01;
-    int itrmax = 1000;
+    int itrmax = 5000;
     double err0 = 1.0e-6;
 
     // Matrix for Lis solver
@@ -40,7 +76,8 @@ static int solve_pre(Matrix_t* A) {
 	ierr = lis_matrix_set_size(info->Matrix, 0, nn);
 
     // Setup Lis Matrix from CSR (Compressed Row Storage)
-    ierr = lis_matrix_set_csr(A->NNZ, A->pointers, A->indice, (LIS_SCALAR*)A->values, info->Matrix);
+    //ierr = lis_matrix_set_csr(A->NNZ, A->pointers, A->indice, (LIS_SCALAR*)A->values, info->Matrix);
+    ierr = lis_matrix_set_csr(A->NNZ, A->pointers, A->indice, A->values, info->Matrix);
     if (ierr != 0) {
         fprintf(stderr,"ERROR: lis_matrixs_set_csr() fails with ierr=%d\n", ierr);
         return -1;
@@ -50,6 +87,12 @@ static int solve_pre(Matrix_t* A) {
         fprintf(stderr,"ERROR: lis_matrixs_set_assemble() fails with ierr=%d\n", ierr);
         return -1;
     }
+
+#ifdef USE_SXAURORA_SBLAS
+    // Setup SBLAS
+    ierr = lis_matrix_set_sblas( nn, nn, A->pointers, A->indice, A->values);
+    if (ierr != 0) fprintf(stderr,"lis.c#49: ierr=%d\n", ierr);
+#endif
 
     // Lis Solver
     ierr = lis_solver_create(&(info->solver));
