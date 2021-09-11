@@ -2,7 +2,8 @@ WITH_MKL=true
 WITH_MKL_SBLAS=true
 WITH_ONEAPI=true
 
-LIS_ROOT = ../../../../../dist
+LIS_ROOT = ../../../../../lib
+#LIS_ROOT = $(HOME)/local
 
 CXXFLAGS = -g -I$(LIS_ROOT)/include
 #CXXFLAGS += -DSORT_CSR
@@ -28,16 +29,16 @@ $(SOLVER_OBJ): $(SOLVER_SRC)
 	$(CC) $(CFLAGS) -c $^
 
 lis_csr: $(COMMON_OBJS) lis_csr.o
-	$(CXX) $(FFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 lis_csc: $(COMMON_OBJS) lis_csc.o
-	$(CXX) $(FFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 lis_ell: $(COMMON_OBJS) lis_ell.o
-	$(CXX) $(FFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 lis_jad: $(COMMON_OBJS) lis_jad.o
-	$(CXX) $(FFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:
 	rm *.o $(CMDS)
