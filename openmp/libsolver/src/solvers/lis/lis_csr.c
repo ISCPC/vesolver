@@ -18,7 +18,7 @@ typedef struct lis_info {
 	LIS_SOLVER  solver;
 } lis_info_t;
 
-#define STR_BUFSIZE 256
+#define STR_BUFSIZE 1024
 
 static int solve_pre(Matrix_t* A) {
     LIS_INT ierr;
@@ -91,27 +91,34 @@ static int solve_pre(Matrix_t* A) {
 #ifdef USE_SXAURORA_SBLAS
     // Setup SBLAS
     ierr = lis_matrix_set_sblas( nn, nn, A->pointers, A->indice, A->values);
+    if (ierr != 0) {
+        fprintf(stderr,"ERROR: lis_matrixs_set_sblas() fails with ierr=%d\n", ierr);
+        return -1;
+    }
     if (ierr != 0) fprintf(stderr,"lis.c#49: ierr=%d\n", ierr);
 #endif
 
     // Lis Solver
     ierr = lis_solver_create(&(info->solver));
+    if (ierr != 0) {
+        fprintf(stderr,"ERROR: lis_solver_create() fails with ierr=%d\n", ierr);
+        return -1;
+    }
 
     // Lis options
-    // solver number
-    snprintf(string, STR_BUFSIZE, "-i %d", SOLVER_number);
-    ierr = lis_solver_set_option(string,info->solver);
-    // precondition number
-    snprintf(string, STR_BUFSIZE, "-p %d", PRECOND_number);
-    ierr = lis_solver_set_option(string,info->solver);
+    sprintf(string, "-i %d -p %d -maxiter %d -tol %f",
+         SOLVER_number, PRECOND_number, itrmax, err0);
     // AMG options
     if (PRECOND_number == 7) {
-        snprintf(string, STR_BUFSIZE, "-saamg_unsym true -saamg_theta %f", LIS_AMG_THETA);
-        ierr = lis_solver_set_option(string,info->solver);
+        snprintf(string, STR_BUFSIZE, "%s -saamg_unsym true -saamg_theta %f", string, LIS_AMG_THETA);
     }
-    // Iterations, Tolerance
-    snprintf(string, STR_BUFSIZE, "-maxiter %d -tol %f", itrmax, err0);
+
+    printf("INFO: Lis solver with option \"%s\"\n", string);
     ierr = lis_solver_set_option(string,info->solver);
+    if (ierr != 0) {
+        fprintf(stderr,"WARNING: lis_solver_set_option() failed with ierr=%d\n", ierr);
+        return -1;
+    }
 
     A->info = (void*)info;
     return 0;
