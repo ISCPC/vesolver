@@ -4,11 +4,11 @@ WITH_ONEAPI=true
 
 LIS_ROOT = ../../../../../lib
 #LIS_ROOT = $(HOME)/local
+#LIS_ROOT = $(HOME)/local/ve
 
 CXXFLAGS = -g -I$(LIS_ROOT)/include
 #CXXFLAGS += -DSORT_CSR
 CFLAGS = -g -I$(LIS_ROOT)/include
-#CFLAGS += -DUSE_SXAURORA_SBLAS
 #LDFLAGS = -L$(LIS_ROOT)/lib -llis -nofor-main -lstdc++
 LDFLAGS = -L$(LIS_ROOT)/lib -llis
 
