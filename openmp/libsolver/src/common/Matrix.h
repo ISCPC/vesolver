@@ -53,8 +53,10 @@ SOFTWARE.
 #define MATRIX_TYPE_NON_UNIT   (0)
 #define MATRIX_TYPE_CSC        (0<<8)
 #define MATRIX_TYPE_CSR        (1<<8)
-#define MATRIX_TYPE_DCSC       (2<<8)
-#define MATRIX_TYPE_DCSR       (3<<8)
+#define MATRIX_TYPE_ELLPACK    (2<<8)
+#define MATRIX_TYPE_JAD        (3<<8)
+#define MATRIX_TYPE_DCSC       (8<<8)
+#define MATRIX_TYPE_DCSR       (9<<8)
 #define MATRIX_TYPE_MASK       (0xf<<8)
 
 #define MATRIX_INDEX_TYPE(A)    (((A)->flags)&0xf)
