@@ -31,10 +31,10 @@ static int solve_pre(Matrix_t* A) {
     int nn = A->NROWS;
 
     // Parameters
-    //int SOLVER_number = 1; /* CG */
+    int SOLVER_number = 1; /* CG */
     //int SOLVER_number = 2; /* BiCG */
     //int SOLVER_number = 3; /* CGS */
-    int SOLVER_number = 4; /* BiCGStab */
+    //int SOLVER_number = 4; /* BiCGStab */
     //int SOLVER_number = 5; /* BiCGStab(l) */
     //int SOLVER_number = 6; /* GPBiCG */
     //int SOLVER_number = 7; /* TFQMR */
@@ -68,7 +68,7 @@ static int solve_pre(Matrix_t* A) {
     //int PRECOND_number = 8; /* Cront ILU */
     //int PRECOND_number = 9; /* ILUT */
     float LIS_AMG_THETA = 0.01;
-    int itrmax = 5000;
+    int itrmax = 10000;
     double err0 = 1.0e-6;
 
     // Matrix for Lis solver
@@ -87,16 +87,6 @@ static int solve_pre(Matrix_t* A) {
         fprintf(stderr,"ERROR: lis_matrixs_set_assemble() fails with ierr=%d\n", ierr);
         return -1;
     }
-
-#ifdef USE_SXAURORA_SBLAS
-    // Setup SBLAS
-    ierr = lis_matrix_set_sblas( nn, nn, A->pointers, A->indice, A->values);
-    if (ierr != 0) {
-        fprintf(stderr,"ERROR: lis_matrixs_set_sblas() fails with ierr=%d\n", ierr);
-        return -1;
-    }
-    if (ierr != 0) fprintf(stderr,"lis.c#49: ierr=%d\n", ierr);
-#endif
 
     // Lis Solver
     ierr = lis_solver_create(&(info->solver));
