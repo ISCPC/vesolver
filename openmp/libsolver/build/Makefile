@@ -7,7 +7,8 @@ DESTDIR = $(DISTSDIR)/ve/lib
 INCLUDEDIR = $(DISTSDIR)/ve/include
 
 CC = ncc
-CFLAGS = -O3 -fpic -I$(SRCDIR)/common -DSXAT -D_TIMELOG
+CFLAGS = -O3 -fpic -I$(SRCDIR)/common -DSXAT
+#CFLAGS += -D_TIMELOG
 LDFLAGS = -fpic -shared -lcblas -lblas_openmp -lsblas_openmp
 
 CSRCS = $(SRCDIR)/common/LinearSolver.c
