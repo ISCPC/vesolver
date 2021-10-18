@@ -1,10 +1,10 @@
-DISTSDIR=../../dists
+DESTDIR=../../dists
 
 INSTALL = /usr/bin/install 
 
 SRCDIR = ../src
-INCDIR=$(DISTSDIR)/ve/include
-LIBDIR=$(DISTSDIR)/ve/lib
+INCDIR = $(DESTDIR)/ve/include
+LIBDIR = $(DESTDIR)/ve/lib
 
 CC = ncc
 CFLAGS = -O3 -fpic -I$(SRCDIR) -I$(INCDIR) -DSXAT -D_TIMELOG

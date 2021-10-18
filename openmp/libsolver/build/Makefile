@@ -1,10 +1,10 @@
-DISTSDIR=../../dists
+DESTDIR=../../dists
 
 INSTALL = /usr/bin/install
 
 SRCDIR = ../src
-DESTDIR = $(DISTSDIR)/ve/lib
-INCLUDEDIR = $(DISTSDIR)/ve/include
+INCDIR = $(DESTDIR)/ve/include
+LIBDIR = $(DESTDIR)/ve/lib
 
 CC = ncc
 CFLAGS = -O3 -fpic -I$(SRCDIR)/common -DSXAT
@@ -38,7 +38,7 @@ clean:
 	rm $(OBJS2) libsolver.so
 
 install: libsolver.so
-	$(INSTALL) -D libsolver.so $(DESTDIR)/libsolver.so
-	$(INSTALL) -D $(SRCDIR)/common/LinearSolver.h $(INCLUDEDIR)/LinearSolver.h
-	$(INSTALL) -D $(SRCDIR)/common/Matrix.h $(INCLUDEDIR)/Matrix.h
-	$(INSTALL) -D $(SRCDIR)/common/PluginAPI.h $(INCLUDEDIR)/PluginAPI.h
+	$(INSTALL) -D libsolver.so $(LIBDIR)/libsolver.so
+	$(INSTALL) -D $(SRCDIR)/common/LinearSolver.h $(INCDIR)/LinearSolver.h
+	$(INSTALL) -D $(SRCDIR)/common/Matrix.h $(INCDIR)/Matrix.h
+	$(INSTALL) -D $(SRCDIR)/common/PluginAPI.h $(INCDIR)/PluginAPI.h
