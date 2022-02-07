@@ -127,29 +127,36 @@ int main(int argc, char** argv) {
     char* env = getenv("NLOOPS");
     if (env != NULL) {
         loop_num = atoi(env);
-        if (loop_num > 10) {
-            loop_num = 10;
+        if (loop_num > 100) {
+            loop_num = 100;
         }
     }
+
+    TIMELOG_START(tl2);
+    /* setMatrix */
+    TIMELOG_START(tl1);
+    cc = solver->setMatrixCSR(A.nrow, A.ndim, A.pointers, A.indice, A.value, flags);
+    if (cc != 0) {
+        printf("ERROR: setMatrix failed with %d\n", cc);
+        exit(1);
+    }
+    TIMELOG_END(tl1, "setMatrix");
+
+    /* optimize */
+    TIMELOG_START(tl1);
+    cc = solver->optimize();
+    if (cc != 0) {
+        printf("ERROR: optimize failed with %d\n", cc);
+        exit(1);
+    }
+    TIMELOG_END(tl1, "optimize");
+
+    /* solve */
+    printf("INFO: solving... (res=%le)\n", res);
     for (int i=0; i<loop_num; i++) {
-        TIMELOG_START(tl2);
-        TIMELOG_START(tl1);
-        cc = solver->setMatrixCSR(A.nrow, A.ndim, A.pointers, A.indice, A.value, flags);
-        if (cc != 0) {
-            printf("ERROR: setMatrix failed with %d\n", cc);
-            exit(1);
+        for(int j=0; j<A.nrow; j++) {
+            x.value[j] = 0.0f;
         }
-        TIMELOG_END(tl1, "setMatrix");
-
-        TIMELOG_START(tl1);
-        cc = solver->optimize();
-        if (cc != 0) {
-            printf("ERROR: optimize failed with %d\n", cc);
-            exit(1);
-        }
-        TIMELOG_END(tl1, "optimize");
-
-        printf("INFO: solving... (res=%le)\n", res);
         TIMELOG_START(tl1);
         cc = solver->solve(b.value, x.value, res);
         if (cc != 0) {
@@ -157,8 +164,8 @@ int main(int argc, char** argv) {
             exit(1);
         }
         TIMELOG_END(tl1, "solve");
-        TIMELOG_END(tl2, "overall");
     }
+    TIMELOG_END(tl2, "overall");
 
     /* Print the solution vector */
     printf("%s\n", "******** Solution ********");

@@ -55,6 +55,7 @@ SOFTWARE.
 #define MATRIX_TYPE_CSR        (1<<8)
 #define MATRIX_TYPE_ELLPACK    (2<<8)
 #define MATRIX_TYPE_JAD        (3<<8)
+#define MATRIX_TYPE_DIA        (4<<8)
 #define MATRIX_TYPE_DCSC       (8<<8)
 #define MATRIX_TYPE_DCSR       (9<<8)
 #define MATRIX_TYPE_MASK       (0xf<<8)

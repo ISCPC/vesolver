@@ -10,7 +10,7 @@ CXXFLAGS = -g -D_STANDALONE
 #CXXFLAGS += -DSORT_CSR
 CFLAGS = -g -D_STANDALONE
 FFLAGS = -g -D_STANDALONE
-LDFLAGS = -lstdc++
+LDFLAGS = -mlcmain=main -lstdc++
 
 BUILD_ENV = fccpx
 

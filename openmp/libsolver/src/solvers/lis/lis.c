@@ -44,8 +44,7 @@ typedef struct lis_info {
 #define STR_BUFSIZE 1024
 
 static int get_matrix_type() {
-    int type = MATRIX_TYPE_CSR;
-    char* mattype_str = getenv("SOVLER_MATRIX_TYPE");
+    char* mattype_str = getenv("SOLVER_MATRIX_TYPE");
 
     if (mattype_str != NULL) {
         if (strcmp(mattype_str, "CSR") == 0) {
@@ -56,6 +55,8 @@ static int get_matrix_type() {
             return MATRIX_TYPE_ELLPACK;
         } else if (strcmp(mattype_str, "JAD") == 0) {
             return MATRIX_TYPE_JAD;
+        } else if (strcmp(mattype_str, "DIA") == 0) {
+            return MATRIX_TYPE_DIA;
         }
     }
 
@@ -64,52 +65,57 @@ static int get_matrix_type() {
 
 static int lis_set_matrix(Matrix_t *A, lis_info_t *info) {
     LIS_INT ierr;
+    LIS_MATRIX  Matrix_CSR;
+    TIMELOG(tl);
 
-    switch(get_matrix_type()) {
-    case MATRIX_TYPE_CSR:
+    Matrix_extract_symmetric(A);
+    Matrix_convert_index(A, 0);
+
+    int mat_type = get_matrix_type();
+    if (mat_type == MATRIX_TYPE_CSR) {
         printf("INFO: Solve with CSR format.\n");
-        Matrix_extract_symmetric(A);
-        Matrix_convert_index(A, 0);
 
-        ierr = lis_matrix_set_csr(A->NNZ, A->pointers, A->indice, A->values, info->Matrix);
-        break;
+	    ierr = lis_matrix_set_size(info->Matrix, 0, A->NROWS);
+        return lis_matrix_set_csr(A->NNZ, A->pointers, A->indice, A->values, info->Matrix);
+    }
 
+	ierr = lis_matrix_create(0, &Matrix_CSR);
+	ierr = lis_matrix_set_size(Matrix_CSR, 0, A->NROWS);
+    ierr = lis_matrix_set_csr(A->NNZ, A->pointers, A->indice, A->values, Matrix_CSR);
+    ierr = lis_matrix_assemble(Matrix_CSR);
+    if (ierr != 0) {
+        fprintf(stderr,"ERROR: lis_matrixs_set_assemble() fails with ierr=%d\n", ierr);
+        return -1;
+    }
+
+    switch(mat_type) {
     case MATRIX_TYPE_CSC:
         printf("INFO: Solve with CSC format.\n");
-        if (MATRIX_IS_CSR(A)) {
-            Matrix_transpose(A);
-        }
-
-        Matrix_convert_index(A, 0);
-
-        ierr = lis_matrix_set_csc(A->NNZ, A->pointers, A->indice, A->values, info->Matrix);
+        ierr = lis_matrix_set_type(info->Matrix, LIS_MATRIX_CSC);
         break;
 
     case MATRIX_TYPE_ELLPACK:
         printf("INFO: Solve with ELLPACK format.\n");
-        Matrix_create_ellpack(A);
-
-        // Temporary: convert to zero based index for lis
-        for (int i=0; i<(A->NROWS)*(A->_ellpack.nw); i++) {
-            A->_ellpack.ICOL[i]--;
-        }
-
-        ierr = lis_matrix_set_ell(A->_ellpack.nw, A->_ellpack.ICOL, A->_ellpack.COEF, info->Matrix);
+        ierr = lis_matrix_set_type(info->Matrix, LIS_MATRIX_ELL);
         break;
 
     case MATRIX_TYPE_JAD:
         printf("INFO: Solve with JAD format.\n");
-        Matrix_create_jad(A);
+        ierr = lis_matrix_set_type(info->Matrix, LIS_MATRIX_JAD);
+        break;
 
-        //ierr = lis_matrix_set_jad(nnz, maxnzr, perm, ptr, index, value. A);
-        ierr = lis_matrix_set_jad(A->NNZ, A->_jad.maxnzr, A->_jad.perm, A->_jad.ptr,
-            A->_jad.index, A->_jad.value, info->Matrix);
+    case MATRIX_TYPE_DIA:
+        printf("INFO: Solve with DIA format.\n");
+        ierr = lis_matrix_set_type(info->Matrix, LIS_MATRIX_DIA);
         break;
 
     default:
-        ierr = -1;
-        break;
+        return ierr;
     }
+
+    TIMELOG_START(tl);
+    ierr = lis_matrix_convert(Matrix_CSR, info->Matrix);
+    TIMELOG_END(tl, "lis_matrix_convert");
 
     return ierr;
 }
@@ -210,7 +216,6 @@ static int solve(Matrix_t *A, const double* b, double* x, const double tolerance
     LIS_INT itr;
     LIS_REAL rr;
     LIS_INT ierr;
-    TIMELOG(tl1);
 
     lis_info_t* info = (lis_info_t*)(A->info);
     int nn = A->NROWS;
@@ -272,7 +277,7 @@ static int solve_post(Matrix_t* A) {
     A->pointers = A->indice = NULL;
     A->values = NULL;
 
-    return 0;
+    return ierr;
 }
 
 static void solve_free(SolverPlugin_t* solver) {

@@ -132,13 +132,17 @@ static int solve(Matrix_t *A, const double* b, double* x, const double tolerance
         return -1;
     }
 
-    /* Handle Finalization */
-    ierr = HS_finalize_handle(info->hnd);
-
     return 0;
 }
 
 static int solve_post(Matrix_t* A) {
+    int ierr;
+
+    hs_info_t* info = (hs_info_t*)(A->info);
+
+    /* Handle Finalization */
+    ierr = HS_finalize_handle(info->hnd);
+
     Matrix_free(A);
 
     return 0;
