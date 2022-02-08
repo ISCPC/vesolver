@@ -84,7 +84,7 @@ static void CG (const Matrix_t *A, const double *b, double *x, double *eps, ITG 
     for (k=1; k<=(*niter); k++) {
         if ((ram<=c1*qam) && k!=1) break;
         rr = DDOT(neq, r, r);
-#if 1
+#if 0
         if ((k % 100) == 0) {
             printf("iteration= %d, error= %e, limit=%e\n",k,ram,c1*qam);
         }

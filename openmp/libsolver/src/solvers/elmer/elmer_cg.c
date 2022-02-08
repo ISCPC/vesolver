@@ -164,7 +164,7 @@ static int solve(Matrix_t *A, const double* b, double* x, const double tolerance
     int iter_count;
     double residual, rhsnorm;
     int ndim = A->NROWS;
-    int debug=1;
+    int debug=0;
 
     // work vectors
     double* work = (double*)calloc(sizeof(double), ndim*4);
