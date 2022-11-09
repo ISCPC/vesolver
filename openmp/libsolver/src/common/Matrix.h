@@ -106,6 +106,7 @@ typedef struct Matrix {
     int *iw;
 #endif
     int optimized;
+    int allocated;
 } Matrix_t;
 
 /*

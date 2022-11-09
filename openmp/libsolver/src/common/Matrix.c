@@ -37,14 +37,20 @@ void Matrix_setMatrixCSR(Matrix_t *A, const int nrows, const int nnz, const int 
     A->NROWS = nrows;
     A->NNZ = nnz;
     A->flags = flags;
-
+#ifdef SXAT
+    A->pointers = aptr;
+    A->indice = aind;
+    A->values = aval;
+#else
     A->pointers = (int*)calloc(sizeof(int), A->NROWS+1);
     A->indice = (int*)calloc(sizeof(int), A->NNZ);
     A->values = (double*)calloc(sizeof(double), A->NNZ);
+    A->allocated = 1;
 
     bcopy(aptr, A->pointers, sizeof(int)*(A->NROWS+1));
     bcopy(aind, A->indice, sizeof(int)*(A->NNZ));
     bcopy(aval, A->values, sizeof(double)*(A->NNZ));
+#endif
 
     A->optimized = 0;
 }
@@ -59,6 +65,7 @@ Matrix_t* Matrix_duplicate(const Matrix_t* A) {
     D->pointers = (int*)calloc(sizeof(int), A->NROWS+1);
     D->indice = (int*)calloc(sizeof(int), A->NNZ);
     D->values = (double*)calloc(sizeof(double), A->NNZ);
+    D->allocated = 1;
 
     bcopy(A->pointers, D->pointers, sizeof(int)*(A->NROWS+1));
     bcopy(A->indice, D->indice, sizeof(int)*(A->NNZ));
@@ -437,26 +444,30 @@ void Matrix_init_generic(Matrix_t *A) {
     A->indice = NULL;
     A->values = NULL;
     A->info = NULL;
+    A->allocated = 0;
 }
 
 #pragma weak Matrix_free = Matrix_free_generic
 void Matrix_free_generic(Matrix_t *A) {
-    if (A->pointers) {
-        free(A->pointers);
-        A->pointers = NULL;
-    }
+    if(A->allocated == 1) {
+        if (A->pointers) {
+            free(A->pointers);
+            A->pointers = NULL;
+        }
 
-    if (A->indice) {
-        free(A->indice);
-        A->indice = NULL;
-    }
-    if (A->values) {
-        free(A->values);
-        A->values = NULL;
-    }
-    if (A->info) {
-        free(A->info);
-        A->info = NULL;
+        if (A->indice) {
+            free(A->indice);
+            A->indice = NULL;
+        }
+        if (A->values) {
+            free(A->values);
+            A->values = NULL;
+        }
+        if (A->info) {
+            free(A->info);
+            A->info = NULL;
+        }
+        A->allocated = 0;
     }
 
     A->optimized = 0;

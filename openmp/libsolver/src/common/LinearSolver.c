@@ -99,10 +99,16 @@ SolverHandle_t solver_create_handle() {
 }
 
 int solver_free_handle(SolverHandle_t hdl) {
+#ifdef SXAT
+	if (solver->solve_post(A) != 0) {
+		printf("WARNING: PostProcess() failed.\n");
+	}
+#else
 	if (solver->solve_post(D) != 0) {
 		printf("WARNING: PostProcess() failed.\n");
 	}
 	Matrix_free(A);
+#endif
 	return 0;
 }
 
@@ -136,8 +142,12 @@ int solver_set_matrix_csr(SolverHandle_t hdl,
 
 	// Optimize Coefficient Matrix internally
 	TIMELOG_START(tl);
+#ifdef SXAT
+	int cc = solver->solve_pre(A);
+#else
     D = Matrix_duplicate(A);
 	int cc = solver->solve_pre(D);
+#endif
     TIMELOG_END(tl, "preProcess");
 
     return cc;
@@ -145,7 +155,11 @@ int solver_set_matrix_csr(SolverHandle_t hdl,
 
 int solver_solve(SolverHandle_t hdl, const double* b, double* x, const double res) {
 	//res=1.e-4;
+#ifdef SXAT
+	return (A != NULL) ? (solver->solve)(A, b, x, res) : -1;
+#else
 	return (D != NULL) ? (solver->solve)(D, b, x, res) : -1;
+#endif
 }
 
 //int solver_solve_sync(SolverHandle_t hdl, const double* b, double* x, const double res);

@@ -457,7 +457,12 @@ int vesolver_solve_sync(vesolver_handle_t hdl, double* b, double* x, double res)
     VEO_WRITE_MEM(context, vedesc->bptr, b, neq*sizeof(double));
     veo_args_set_u64(argp, 0, vedesc->dptr);
 
+#if 0
     uint64_t retval = VEO_CALL_SYNC(context, VESOLVER_SOLVE, argp);
+#else
+    uint64_t id = VEO_CALL_ASYNC(context, VESOLVER_SOLVE, argp);
+    uint64_t retval = VEO_CALL_WAIT(context, id);
+#endif
     veo_args_free(argp);
 
     VEO_READ_MEM(context, x, vedesc->xptr, neq*sizeof(double));
