@@ -142,7 +142,7 @@ static int solve_pre(Matrix_t* A) {
 
     /*  extract diagonal vector from matrix A  */
     for (int i=0; i<A->NROWS; i++) {
-        factor[i] = 1.0/sqrt(A->values[A->pointers[i]]);
+        factor[i] = 1.0/sqrt(fabs(A->values[A->pointers[i]]));
     }
 
     /*  scale matrix A  */
