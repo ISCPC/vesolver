@@ -125,7 +125,8 @@ static int solve(Matrix_t *A, const double* b, double* x, const double tolerance
     FTRACE_REGION_END("HS_solve");
     if (ierr != HS_RESULT_OK) {
         if (ierr == HS_ERROR_ACCURACY) {
-            fprintf(stderr, "ERROR: HS_solve_rd failed with HS_ERROR_ACCURACY (res=%e).\n", res);
+            fprintf(stderr, "NOTICE: HS_solve_rd failed with HS_ERROR_ACCURACY (res=%e).\n", res);
+	    return 0;
         } else {
             fprintf(stderr, "ERROR: HS_solve_rd failed with %d.\n", ierr);
         }
